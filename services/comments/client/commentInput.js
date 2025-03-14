@@ -17,13 +17,45 @@ class CommentInput extends HTMLElement {
                     height: 80%;
                     margin-bottom: 10px;
                 }
-                .comment-box button {
-                    align-self: flex-end;
+
+                /* all children inline  */
+                .radio-group * {
+                    display: inline-block;
+                    /* no bold text */
+                    font-weight: normal
                 }
+                
+                
+
+
+                .comment-box .radio-group {
+                    display: flex;
+                    align-items: left;
+                    margin-bottom: 10px;
+                    font-size: 0.8em;
+                    color: #666;
+                }
+                .comment-box .radio-group input[type="radio"] {
+                    margin-right: 4px;                   
+                }
+                .radio-group label {
+                    margin-right: 10px;
+                }
+            
+             
             </style>
                 <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
 
             <div class="comment-box">
+                <!-- radio buttons -->
+                <div class="radio-group">
+                    <input type="radio" id='theme2' name="theme" value="theme2">
+                    <label for="theme1">Theme 1</label>
+                    <input type="radio" id='theme3' name="theme" value="theme3">
+                    <label for="theme2">Social ...?..</label>
+                    <input type="radio" id='theme1' name="theme" value="theme1" checked>
+                    <label for="theme3">State Capacity</label>
+                </div>
                 <textarea placeholder="Write your comment..."></textarea>
                 <button>Send</button>
             </div>

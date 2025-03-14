@@ -120,7 +120,15 @@ async function getEvents (){
             event.rooms = event.containsRooms.map(roomId => rooms.find(room => room._id === roomId));
         });
 
-        return events;
+        // get event from url param /evententry/:eventID
+        var eventID = window.location.href.split('/evententry/').pop();
+        // clean up trailing nonalphanumeric characters
+
+        eventID = eventID.replace(/[^a-zA-Z0-9]/g, '');
+
+        const thisOneEvent = events.filter(event => event._id === eventID);
+
+        return thisOneEvent;
 
     }
     

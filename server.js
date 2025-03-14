@@ -112,6 +112,12 @@ app.get('/aovi/eventlist', userService.authorizeBasic, redirectUnauthorized, (re
 });
 
 
+// evententry/:event
+app.get('/aovi/evententry/:event', userService.authorizeBasic, redirectUnauthorized, (req, res) => {
+    res.sendFile(__dirname + '/client/evententry.html');
+});
+
+
 
 app.get('/aovi/eventqr/:event', userService.authorizeBasic, redirectUnauthorized, (req, res) => {
     // generate qr code for url

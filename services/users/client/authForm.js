@@ -42,9 +42,9 @@ class AuthenticationForm extends HTMLElement {
                 }
             </style>
             <div class="container">
-                <login-form class="login-form"></login-form>
-                <registration-form class="registration-form hidden"></registration-form>
-                <a id="toggle-link">Don't have an account? Register</a>
+                <login-form class="login-form hidden"></login-form>
+                <registration-form class="registration-form"></registration-form>
+                <a id="toggle-link">Already registered? Login</a>
             </div>
         `;
     }
@@ -112,19 +112,23 @@ class LoginForm extends HTMLElement {
             
         `;
 
-        this.form = this.shadowRoot.querySelector('form');
-        this.username = this.shadowRoot.querySelector('#username');
-        this.password = this.shadowRoot.querySelector('#password');
-        this.display = this.shadowRoot.querySelector('.error');
+
         
     }
 
     connectedCallback() {
 
+        this.render();
+
+        this.form = this.shadowRoot.querySelector('form');
+        this.username = this.shadowRoot.querySelector('#username');
+        this.password = this.shadowRoot.querySelector('#password');
+        this.display = this.shadowRoot.querySelector('.error');
+
 
         this.form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            this.targetUrl = this.getAttribute('target-url') || '/';
+            const targeturl = this.getAttribute('target-url') || '/';
             this.loginEndpoint = this.getAttribute('login-endpoint') || './user/login';
 
             this.display.textContent = '';
@@ -139,7 +143,7 @@ class LoginForm extends HTMLElement {
                 if (res.status === 400 || res.status === 401) {
                     return this.display.textContent = `${data.message}. ${data.error ? data.error : ''}`;
                 }
-                location.assign(this.targetUrl);
+                location.assign(targeturl);
             } catch (err) {
                 console.log(err.message);
             }
@@ -217,7 +221,8 @@ class RegistrationForm extends HTMLElement {
                 const data = await res.json();
 
                 if (res.status === 200 || res.status === 201) {
-                    location.assign(targeturl);
+                    // activate login form
+                    loginLink.click();
                 } else if (res.status === 400 || res.status === 401) {
                     display.textContent = `${data.message}. ${data.error ? data.error : ''}`;
                 }

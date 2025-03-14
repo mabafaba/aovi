@@ -155,6 +155,11 @@ class MainNavigation extends HTMLElement {
                     background-color: #ddd;
                 }
 
+                #backbutton {
+
+                    cursor: pointer;
+                }
+
             </style>
             <nav>
 
