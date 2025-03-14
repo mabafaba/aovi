@@ -47,7 +47,6 @@ router.route("/me").get(authorizeBasic,
 
 // views
 
-router.route("/home").get((req, res) => res.render("home"));
 router.route("/register").get((req, res) => res.render("register"));
 router.route("/login").get((req, res) => res.render("login"));
 router.route("/logout").get((req, res) => {
@@ -57,7 +56,11 @@ router.route("/logout").get((req, res) => {
   // login page allows to redirect to a target url
   // i.e. user originally wanted to go to 'targeturl' but needs to login first,
   // then the login page will redirect themto 'targeturl'
-  res.redirect("./login?targeturl=" + target);
+  if(target){
+    res.redirect(target);
+  }else{
+  res.redirect("/aovi/login");
+  }
 });
 
 

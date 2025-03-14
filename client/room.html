@@ -128,7 +128,10 @@
         console.log('event:', event);
         console.log('room:', room);
 
-     const appHtml =  `<main-navigation room="${room}"></main-navigation>
+     const appHtml =  `<main-navigation
+     room="${room}"
+     back-url="/aovi/event/id/${event}"
+     ></main-navigation>
     <div id="question"></div>
     <display-comments-as-chat room="${room}"></display-comments-as-chat>
     <comment-input room="${room}"></comment-input>

@@ -11,7 +11,21 @@
     <authentication-form
     login-endpoint="/aovi/user/login"
     register-endpoint="/aovi/user/register"
-    target-url="/aovi/room/someroom"
+    target-url="/aovi"
     ></authentication-form>
 </body>
+
+
+<script>
+
+// get target url from something  like this
+// http://localhost:3000/aovi/login?targeturl=/aovi/event/create
+
+const urlParams = new URLSearchParams(window.location.search);
+const targetUrl = urlParams.get('targeturl');
+console.log(targetUrl);
+// set as target-url
+document.querySelector('authentication-form').setAttribute('target-url', targetUrl);
+
+</script>
 </html>

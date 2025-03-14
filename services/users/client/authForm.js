@@ -4,6 +4,19 @@ class AuthenticationForm extends HTMLElement {
         this.attachShadow({ mode: 'open' });
     }
 
+    static get observedAttributes() {
+        return ['target-url'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'target-url') {
+            const loginForm = this.shadowRoot.querySelector('.login-form');
+            const registrationForm = this.shadowRoot.querySelector('.registration-form');
+            if (loginForm) loginForm.setAttribute('target-url', newValue);
+            if (registrationForm) registrationForm.setAttribute('target-url', newValue);
+        }
+    }
+
     connectedCallback() {
         this.render();
         this.addEventListeners();

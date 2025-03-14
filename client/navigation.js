@@ -10,6 +10,68 @@ class MainNavigation extends HTMLElement {
             const menu =  this.shadowRoot.getElementById('menu');
             this.shadowRoot.getElementById('menu').classList.toggle('hidden');
         });
+
+        // if back-url attribute is set, show back button & add event listener
+        
+        // fetching back0-url
+        console.log('back url:', this.getAttribute('back-url'));
+        if (this.getAttribute('back-url')) {
+            console.log('back url set to', this.getAttribute('back-url'));
+            this.shadowRoot.getElementById('backbutton').classList.remove('hidden');
+            this.shadowRoot.getElementById('backbutton').addEventListener('click', () => {
+                window.location.href = this.getAttribute('back-url');
+            });
+        }
+
+        // if menu-item-1-label & menu-item-1-url attributes are set, add menu item (for however many are set)
+        const setMenuItems = (i) => {
+            const menuItemLabel = this.getAttribute(`menu-item-${i}-label`);
+            const menuItemUrl = this.getAttribute(`menu-item-${i}-url`);
+            if (menuItemLabel && menuItemUrl) {
+                const menu = this.shadowRoot.getElementById('menu');
+                const table = menu.querySelector('table');
+                const row = table.insertRow();
+                const cell = row.insertCell();
+                cell.textContent = menuItemLabel;
+                cell.addEventListener('click', () => {
+                    window.location.href = menuItemUrl;
+                });
+                setMenuItems(i + 1);
+            }
+        }
+        setMenuItems(1);
+
+    }
+
+    static get observedAttributes() {
+        return ['back-url', 'menu-item-1-label', 'menu-item-1-url'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'back-url' && this.shadowRoot) {
+            const backButton = this.shadowRoot.getElementById('backbutton');
+            if (newValue) {
+                console.log('back url set to', newValue);
+                backButton.classList.remove('hidden');
+                backButton.addEventListener('click', () => {
+                    window.location.href = newValue;
+                });
+            } else {
+                backButton.classList.add('hidden');
+                backButton.removeEventListener('click', () => {
+                    window.location.href = oldValue;
+                });
+            }
+        }
+        if (oldValue !== newValue) {
+            this.render();
+        }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+            this.render();
+        }
     }
 
     render() {
@@ -95,18 +157,18 @@ class MainNavigation extends HTMLElement {
 
             </style>
             <nav>
-            <div id="menubutton">
+
+            <div id="backbutton" class="hidden">
+                <i class="fas fa-arrow-left"></i>
+            </div>
+
+            <div id="menubutton" class="hidden">
                 <i class="fas fa-bars"></i>
             </div>
 
-            <div id="menu" class="hidden">
+             <div id="menu" class="hidden">
                 <table>
-                    <tr><td>home</td></tr>
-                    <tr><td>chapters</td></tr>
-                    <tr><td>logout</td></tr>
                 </table>
-
-                </ul>
             </div>
 
             <img src="/aovi/logo.png" id="logo">

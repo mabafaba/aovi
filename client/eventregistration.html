@@ -44,6 +44,7 @@
             color: white;
             padding: 10px;
             margin: 10px;
+            margin-bottom: 100px;
             border-radius: 10px;
             cursor: pointer;
         }
@@ -57,11 +58,27 @@
             cursor: pointer;
         }
 
+        #userGroupInput {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+        }
+
+        input {
+            margin: 30px;
+            display: inline-block;
+        }
+
     </style>
 </head>
 <body>
     <div id="app">
-        
+        <main-navigation></main-navigation>
+        <div id="userGroupInput"></div>
+        <button class="enterRoomButton">JOIN</button>
     
     </div>
     <!-- <svg width="960" height="600"></svg> -->
@@ -83,17 +100,10 @@
 
 
         // get event id from last url part ..../evet/{event}/...
-        const eventIdRaw = location.pathname.split('event/id/').pop();
+        const eventIdRaw = location.pathname.split('eventregistration/id/').pop();
         // strip all non alphanumeric characters
         const eventId = eventIdRaw.replace(/[^a-zA-Z0-9]/g, '');
         console.log('Event id:', eventId);
-
-
-        // insert <main-navigation back-url=....></main-navigation>
-        // document.querySelector('main-navigation').setAttribute('back-url', `/aovi/eventregistration/${eventId}`);
-        
-        const mainNavigation = `<main-navigation back-url="/aovi/eventregistration/id/${eventId}"></main-navigation>`;
-        document.getElementById('app').innerHTML = mainNavigation;
 
         // fetch event data
         const eventData = fetch(`/aovi/rooms/id/${eventId}`, {
@@ -105,24 +115,31 @@
         .then(response => response.json())
         .then(data => {
             console.log('Event data:', data);
-            for(room in data.containsRooms){
-                console.log('Room:', room);
-                // add a div for each room, that is entered when clicked
-                const roomDiv = document.createElement('div');
-                // set classs
-                roomDiv.className = 'enterRoomButton';
-                roomDiv.innerHTML = data.containsRooms[room].name;
-                const roomid =  data.containsRooms[room]._id
-                
-                roomDiv.addEventListener('click', () => {
-                    location.assign(`/aovi/event/${data._id}/room/${roomid}`);
-                });
-                document.getElementById('app').appendChild(roomDiv);
+        const userCategories = data.data.userCategories;
+        const inputsDiv = document.getElementById('userGroupInput');
+        userCategories.forEach(category => {
+            const label = document.createElement('label');
+            label.textContent = category.name;
+            inputsDiv.appendChild(label);
 
-            }
+            const select = document.createElement('select');
+            category.values.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            });
+            inputsDiv.appendChild(select);
+        });
         })
         .catch((error) => {
             console.error('Error fetching event data:', error);
+        });
+
+
+        // event button take me to /aovi/event/id/67d3fed2db6831ccfa76619c
+        document.querySelector('.enterRoomButton').addEventListener('click', () => {
+            location.assign(`/aovi/event/id/${eventId}`);
         });
     
     </script>
