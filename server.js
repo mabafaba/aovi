@@ -108,7 +108,7 @@ app.get('/aovi/event/create', userService.authorizeBasic, redirectUnauthorized, 
 
 
 app.get('/aovi/eventlist', userService.authorizeBasic, redirectUnauthorized, (req, res) => {
-    res.sendFile(__dirname + '/client/eventList.html');
+    res.sendFile(__dirname + '/client/eventlist.html');
 });
 
 
