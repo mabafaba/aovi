@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>D3 Network Graph</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="/aovi/comments/static/commentInput.js"></script>
+    <script src="/aovi/comments/static/displayCommentsAsChat.js"></script>
+    <!-- fontawesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="/aovi/navigation.js"></script>
+    <!-- classless sakura -->
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
+    <style>
+
+        body html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #app {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .links line {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+
+        .nodes circle {
+            stroke: #fff;
+            stroke-width: 1.5px;
+        }
+
+        text {
+            font-family: sans-serif;
+            font-size: 10px;
+        }
+
+        main-navigation {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            height: 10%;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            border-radius:10px;
+        }
+        
+        #question {
+            background-color: #9b00b0;
+            color: white;
+            position: relative;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            height: 20%;
+            border-radius:10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        display-comments-as-chat {
+            padding:20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 45%;
+        }
+        
+        comment-input {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 20%;
+            width:95%;
+        }
+
+    
+        
+
+
+    </style>
+</head>
+<body>
+    <div id="app">
+    
+    </div>
+    <!-- <svg width="960" height="600"></svg> -->
+    <script>
+
+        const me = fetch('/aovi/user/me', {
+            method: 'GET',
+            headers: {
+            'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('User data:', data);
+        })
+        .catch((error) => {
+            console.error('Error fetching user data:', error);
+        });
+
+        // get event and room ids
+        // use /event/ and /room/ as delimiters
+        const pathParts = location.pathname.split('/');
+        const eventIndex = pathParts.indexOf('event');
+        const roomIndex = pathParts.indexOf('room');
+        const event = pathParts[eventIndex + 1];
+        const room = pathParts[roomIndex + 1];
+        console.log('event:', event);
+        console.log('room:', room);
+
+     const appHtml =  `<main-navigation room="${room}"></main-navigation>
+    <div id="question"></div>
+    <display-comments-as-chat room="${room}"></display-comments-as-chat>
+    <comment-input room="${room}"></comment-input>
+    `
+    document.getElementById('app').innerHTML = appHtml;
+
+
+    fetch(`/aovi/rooms/id/${room}`, {
+        method: 'GET',
+        headers: {
+        'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('question').innerHTML = data.title;
+    })
+    .catch((error) => {
+        console.error('Error fetching room data:', error);
+    });
+
+
+        function changeRoom(newRoom) {
+            room = newRoom;
+            document.querySelector('display-comments-as-chat').setAttribute('room', newRoom);
+            document.querySelector('main-navigation').setAttribute('room', newRoom);
+        }
+
+        const graphData = {
+  "nodes": [
+    {
+      "id": 1,
+      "name": "A",
+        "group": "government"
+
+    },
+    {
+        "id": 2,
+        "name": "B",
+        "group": "education sector"
+    },
+    {
+        "id": 3,
+        "name": "C",
+        "group": "health sector"
+    },
+    {
+        "id": 4,
+        "name": "D",
+        "group": "government"
+    },
+    {
+        "id": 5,
+        "name": "E",
+        "group": "education sector"
+    },
+    {
+        "id": 6,
+        "name": "F",
+        "group": "health sector"
+    },
+    {
+        "id": 7,
+        "name": "G",
+        "group": "government"
+    }
+  ],
+    "links": [
+        {
+        "source": 1,
+        "target": 2,
+        "weight": 1
+        },
+        {
+        "source": 1,
+        "target": 3,
+        "weight": 1
+        },
+        {
+        "source": 1,
+        "target": 4,
+        "weight": 1
+        },
+        {
+        "source": 1,
+        "target": 5,
+        "weight": 1
+        },
+        {
+        "source": 1,
+        "target": 6,
+        "weight": 1
+        },
+        {
+        "source": 1,
+        "target": 7,
+        "weight": 5
+        },
+    {
+        "source": 2,
+        "target": 3,
+        "weight": 3
+    },
+    {
+        "source": 3,
+        "target": 4,
+        "weight": 6
+    },
+    {
+        "source": 4,
+        "target": 5,
+        "weight": 2
+    },
+    {
+        "source": 5,
+        "target": 6,
+        "weight": 3
+    },
+    {
+        "source": 6,
+        "target": 7,
+        "weight": 1
+    }
+    ]
+}
+
+        const svg = d3.select("svg"),
+            width = +svg.attr("width"),
+            height = +svg.attr("height");
+
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        const simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(d => d.id))
+            .force("charge", d3.forceManyBody().strength(-400))
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+        d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_network.json").then(graph => {
+            const link = svg.append("g")
+                .attr("class", "links")
+                .selectAll("line")
+                .data(graph.links)
+                .enter().append("line")
+                .attr("stroke-width", d => Math.sqrt(d.weight));
+
+            const node = svg.append("g")
+                .attr("class", "nodes")
+                .selectAll("circle")
+                .data(graph.nodes)
+                .enter().append("circle")
+                .attr("r", 5)
+                .attr("fill", d => color(d.group))
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            node.append("title")
+                .text(d => d.id);
+
+            simulation
+                .nodes(graph.nodes)
+                .on("tick", ticked);
+
+            simulation.force("link")
+                .links(graph.links);
+
+            function ticked() {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                node
+                    .attr("cx", d => d.x)
+                    .attr("cy", d => d.y);
+            }
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <title>Scrolling Timeline Web Component</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; height: 100vh; }
+        timeline-container { display: block; width: 100vw; overflow: hidden; }
+    </style>
+</head>
+<body>
+
+    <timeline-component></timeline-component>
+
+    <script>
+        class TimelineComponent extends HTMLElement {
+            constructor() {
+            super();
+            this.attachShadow({ mode: "open" });
+
+            // Initial start time
+            this.timeZero = new Date().getTime();
+            // 1000 pixels = 5min
+            this.pixelsPerMs = 5000 / (5 * 60 * 1000);
+            this.viewOffsetSeconds = 0;
+            this.elapsed = 0;
+            this.recentEventTopPosition = 0;
+            this.eventYOffset = 0;
+
+            // Shadow DOM content
+            this.shadowRoot.innerHTML = `
+                <style>
+                .timeline-container {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden;
+                    background: #f0f0f0;
+                }
+                .timeline {
+                    position: absolute;
+                    display: flex;
+                    height: 100%;
+                    white-space: nowrap;
+                    will-change: transform;
+                }
+                .minute-marker {
+                    height: 100%;
+                    border-left: 2px dotted gray;
+                    position: absolute;
+                    font-size: 12px;
+                    padding-left: 2px;
+                }
+                .event {
+                    position: absolute;
+                    padding: 5px 10px;
+                    background: lightblue;
+                    border-radius: 4px;
+                    white-space: nowrap;
+                }
+                </style>
+                <div class="timeline-container" id="timeline-container">
+                <div class="timeline" id="timeline"></div>
+                </div>
+            `;
+
+            this.timeline = this.shadowRoot.getElementById("timeline");
+            
+            // Create minute markers
+            // pixels between markers
+            console.log('pixels between markers', 1000 * 60 * this.pixelsPerMs);
+            for (let i = -60; i < 60; i++) {
+                const marker = document.createElement("div");
+                marker.className = "minute-marker";
+                marker.style.left = `${i * 1000 * 60 * this.pixelsPerMs}px`;
+                marker.style.width = 1000 * 60 * this.pixelsPerMs;
+                marker.innerText = new Date(this.timeZero + i * 60000).toLocaleTimeString();
+                this.timeline.appendChild(marker);
+            }
+
+            const nowLine = document.createElement("div");
+            nowLine.id = "now-line";
+            nowLine.style.position = "absolute";
+            nowLine.style.left = "0";
+            nowLine.style.width = "2px";
+            nowLine.style.height = "100%";
+            // dotted left border
+            nowLine.style.borderLeft = "2px dotted red";
+            this.timeline.appendChild(nowLine);
+            
+
+            this.startScrolling();
+            }
+
+            connectedCallback() {
+                this.offsetMakeNowToPercentFromLeft(0.8);
+            }
+
+            listenForNewComments() {
+                const socket = io({ path: '/aovi-socket-io' });
+                socket.on('comment created', (comment) => {
+                    const commentDiv = document.createElement("div");
+                    commentDiv.innerHTML = comment.text;
+                    // style
+                    commentDiv.style.backgroundColor = "lightgreen";
+                    commentDiv.style.padding = "5px";
+                    commentDiv.style.borderRadius = "4px";
+
+
+                    this.addEvent(new Date().getTime(), commentDiv.outerHTML);
+                });
+            }
+
+
+            startScrolling() {
+            const step = () => {
+                this.elapsed = new Date().getTime() - this.timeZero + this.viewOffsetSeconds * 1000;
+                this.timeline.style.transform = `translateX(${-this.elapsed * this.pixelsPerMs}px)`;
+                // adjust now line
+                const nowLine = this.shadowRoot.getElementById("now-line");
+                nowLine.style.left = `${(this.elapsed * this.pixelsPerMs) - (this.viewOffsetSeconds * this.pixelsPerMs)}px`;
+                requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+            }
+
+            addEvent(timestamp, htmlContent) {
+            const timeDiff = timestamp - this.timeZero;
+            const eventDiv = document.createElement("div");
+            eventDiv.className = "event";
+            eventDiv.style.left = `${timeDiff * this.pixelsPerMs}px`;
+            eventDiv.innerHTML = htmlContent;
+            // Stack events from bottom to top
+            const eventCount = this.timeline.querySelectorAll('.event').length;
+            // use recentEventTopPosition to stack events from bottom to top
+            eventDiv.style.bottom = `${this.recentEventTopPosition+10}px`;
+            this.recentEventTopPosition += 30 + eventDiv.clientHeight;
+            // top position reaches top end of timeline, reset to 0
+            if (this.recentEventTopPosition > this.timeline.clientHeight) {
+                this.recentEventTopPosition = 0;
+            }
+            this.timeline.appendChild(eventDiv);
+            }
+
+            offsetViewSeconds(seconds) {
+            this.viewOffsetSeconds += seconds;
+            }
+
+            offsetViewPixels(pixels) {
+                this.viewOffsetSeconds += pixels / this.pixelsPerMs / 1000
+            }
+
+            offsetMakeNowToPercentFromLeft(percent) {
+               // offset in pixels by client width
+               const timelinecontainer = this.shadowRoot.getElementById("timeline-container");
+
+                const offset = timelinecontainer.clientWidth * percent;
+                console.log('offset', offset);
+                this.viewOffsetSeconds = (- offset / this.pixelsPerMs / 1000)+ this.elapsed / 1000;
+            }
+
+        }
+
+        customElements.define("timeline-component", TimelineComponent);
+        
+        
+
+        // Example Usage
+        const timeline = document.querySelector("timeline-component");
+        setTimeout(() => {
+            timeline.addEvent(new Date().getTime(), "<b>Event A</b>");
+            timeline.addEvent(new Date().getTime(), "<i>Event B</i>");
+        }, 2000);
+
+        setTimeout(() => {
+            timeline.addEvent(new Date().getTime(), "<u>Event C</u>");
+        }, 5000);
+
+        setTimeout(() => {
+            timeline.addEvent(new Date().getTime(), "<s>Event D</s>");
+        }, 8000);
+
+        // Set the view to 5 minutes ago
+        setTimeout(() => {
+            const fiveMinutesAgo = new Date().getTime() - 5 * 60 * 1000;
+            timeline.setViewToTime(fiveMinutesAgo);
+        }, 1000);
+
+
+        console.log(timeline);
+
+        //set the view to 10 seconds ago
+        setTimeout(() => {
+            console.log('setting view to 10 seconds ago');
+            const tenSecondsAgo = new Date().getTime() - 10 * 1000;
+            timeline.setViewToTime(tenSecondsAgo);
+        }, 1000);
+        setInterval(() => {
+            const randomString = Math.random().toString(36).substring(7);
+            timeline.addEvent(new Date().getTime(), randomString);
+        }, 500);
+
+        
+    </script>
+
+</body>
+</html>

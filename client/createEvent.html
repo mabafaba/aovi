@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Event</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
+    <script src="/aovi/navigation.js"></script>
+    <script src="/aovi/tabletags.js"></script>
+    <!-- classless sakura -->
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
+    <style>
+
+        body html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #app {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+
+        main-navigation {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            height: 10%;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            border-radius:10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Create Event</h1>
+
+        <!-- name input -->
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" placeholder="Name">
+
+        <!-- title input -->
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" placeholder="Title">
+
+        <label for="tabletags">Participant Categories:</label>
+        <div id="tabletagsContainer"></div>
+
+
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px;">
+            <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                <label for="room1">Room 1:</label>
+                <input type="text" id="room1name" name="room1" placeholder="Name">
+                <input type="text" id="room1title" name="room1title" placeholder="Title">
+            </div>
+            <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                <label for="room2">Room 2:</label>
+                <input type="text" id="room2name" name="room2" placeholder="Name">
+                <input type="text" id="room2title" name="room2title" placeholder="Title">
+            </div>
+            <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                <label for="room3">Room 3:</label>
+                <input type="text" id="room3name" name="room3" placeholder="Name">
+                <input type="text" id="room3title" name="room3title" placeholder="Title">
+            </div>
+        </div>
+
+        <button id="createEventButton" onclick="postEvent()">Create Event</button>
+
+
+    
+    </div>
+    <!-- <svg width="960" height="600"></svg> -->
+    <script>
+        
+    var container = document.getElementById('tabletagsContainer');
+    var tableTags = new TableTags(container);
+
+
+        const me = fetch('/aovi/user/me', {
+            method: 'GET',
+            headers: {
+            'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .catch((error) => {
+            console.error('Error fetching user data:', error);
+        });
+
+
+        postEvent = async function(){
+            var name = document.getElementById('name').value;
+            var title = document.getElementById('title').value;
+            var room1name = document.getElementById('room1name').value;
+            var room1title = document.getElementById('room1title').value;
+            var room2name = document.getElementById('room2name').value;
+            var room2title = document.getElementById('room2title').value;
+            var room3name = document.getElementById('room3name').value;
+            var room3title = document.getElementById('room3title').value;
+
+            var tabletags = tableTags.data
+            const mainRoomData = {name: name, title: title, data: {userCategories:tabletags}}
+            const room1Data = {name: room1name, title: room1title, data: {userCategories:tabletags}}
+            const room2Data = {name: room2name, title: room2title, data: {userCategories:tabletags}}
+            const room3Data = {name: room3name, title: room3title, data: {userCategories:tabletags}}
+
+            const mainroom = await fetch('/aovi/rooms', {
+                method: 'POST',
+                body: JSON.stringify(mainRoomData),
+                headers: { 'Content-Type': 'application/json' }
+            }).then(response => response.json())
+
+                room1Data.parent = mainroom._id
+                room2Data.parent = mainroom._id
+                room3Data.parent = mainroom._id
+
+            const room1 = await fetch('/aovi/rooms', {
+                method: 'POST',
+                body: JSON.stringify(room1Data),
+                headers: { 'Content-Type': 'application/json' }
+            })
+
+            const room2 = await fetch('/aovi/rooms', {
+                method: 'POST',
+                body: JSON.stringify(room2Data),
+                headers: { 'Content-Type': 'application/json' }
+            })
+
+            const room3 = await fetch('/aovi/rooms', {
+                method: 'POST',
+                body: JSON.stringify(room3Data),
+                headers: { 'Content-Type': 'application/json' }
+            })
+
+
+            // got to main room
+            location.assign(`/aovi/event/id/${mainroom._id}`);
+
+        }
+
+    
+    </script>
+</body>
+</html>

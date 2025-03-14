@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Event</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
+    <script src="/aovi/navigation.js"></script>
+    <!-- classless sakura -->
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
+    <style>
+
+        body html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #app {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+
+        main-navigation {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            height: 10%;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            border-radius:10px;
+        }
+
+        .enterRoomButton {
+            background-color: #9b00b0;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .enterRoomButton:hover {
+            background-color: #9b00b0b7;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="app">
+        <main-navigation></main-navigation>
+    
+    </div>
+    <!-- <svg width="960" height="600"></svg> -->
+    <script>
+
+        const me = fetch('/aovi/user/me', {
+            method: 'GET',
+            headers: {
+            'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('User data:', data);
+        })
+        .catch((error) => {
+            console.error('Error fetching user data:', error);
+        });
+
+
+        // get event id from last url part ..../evet/{event}/...
+        const eventIdRaw = location.pathname.split('event/id/').pop();
+        // strip all non alphanumeric characters
+        const eventId = eventIdRaw.replace(/[^a-zA-Z0-9]/g, '');
+        console.log('Event id:', eventId);
+
+
+        
+
+        // fetch event data
+        const eventData = fetch(`/aovi/rooms/id/${eventId}`, {
+            method: 'GET',
+            headers: {
+            'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Event data:', data);
+            for(room in data.containsRooms){
+                console.log('Room:', room);
+                // add a div for each room, that is entered when clicked
+                const roomDiv = document.createElement('div');
+                // set classs
+                roomDiv.className = 'enterRoomButton';
+                roomDiv.innerHTML = data.containsRooms[room].name;
+                const roomid =  data.containsRooms[room]._id
+                
+                roomDiv.addEventListener('click', () => {
+                    location.assign(`/aovi/event/${data._id}/room/${roomid}`);
+                });
+                document.getElementById('app').appendChild(roomDiv);
+
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching event data:', error);
+        });
+    
+    </script>
+</body>
+</html>
