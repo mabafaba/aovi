@@ -83,37 +83,39 @@ class LoginForm extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host form {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                :host input {
-                    margin: 5px;
-                }
-
-                :host a {
-                    margin-top: 10px;
-                }
-            </style>
-            <form>
-                <h1>Login</h1>
-                <div class="error" style="background-color: red;"></div><br>
-                <label for="username">Username</label><br>
-                <input type="text" id="username" required/><br>
-                <label for="password">Password</label><br>
-                <input type="password" id="password" required><br>
-                <input type="submit" value="login"><br>
-            </form>
-            
-        `;
-
-
+        this.render();
         
+    }
+
+    render() {
+        this.shadowRoot.innerHTML = `
+        <style>
+            :host form {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+
+            :host input {
+                margin: 5px;
+            }
+
+            :host a {
+                margin-top: 10px;
+            }
+        </style>
+        <form>
+            <h1>Login</h1>
+            <div class="error" style="background-color: red;"></div><br>
+            <label for="username">Username</label><br>
+            <input type="text" id="username" required/><br>
+            <label for="password">Password</label><br>
+            <input type="password" id="password" required><br>
+            <input type="submit" value="login"><br>
+        </form>
+        
+    `;
     }
 
     connectedCallback() {

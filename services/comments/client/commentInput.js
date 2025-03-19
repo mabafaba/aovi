@@ -7,57 +7,63 @@ class CommentInput extends HTMLElement {
 
         this.shadowRoot.innerHTML = `
             <style>
-                .comment-box {
-                    display: flex;
-                    flex-direction: column;
-                    width: 100%;    
-                }
-                .comment-box textarea {
-                    width: 100%;
-                    height: 80%;
-                    margin-bottom: 10px;
-                }
+            .comment-box {
+                display: flex;
+                flex-direction: column;
+                width: 100%;    
+            }
+            .comment-box textarea {
+                width: 100%;
+                height: 80%;
+                margin-bottom: 10px;
+            }
 
-                /* all children inline  */
-                .radio-group * {
-                    display: inline-block;
-                    /* no bold text */
-                    font-weight: normal
-                }
-                
-                
+            .comment-box .radio-group {
+                display: table;
+                width: 100%;
+                margin-bottom: 10px;
+                font-size: 0.8em;
+                color: #666;
+            }
+            .comment-box .radio-group div {
+                display: table-row;
+            }
+            .comment-box .radio-group label,
+            .comment-box .radio-group input[type="radio"] {
+                display: table-cell;
+                vertical-align: middle;
+                padding: 0px;
+                margin: 0px;
+            }
 
-
-                .comment-box .radio-group {
-                    display: flex;
-                    align-items: left;
-                    margin-bottom: 10px;
-                    font-size: 0.8em;
-                    color: #666;
-                }
-                .comment-box .radio-group input[type="radio"] {
-                    margin-right: 4px;                   
-                }
-                .radio-group label {
-                    margin-right: 10px;
-                }
-            
-             
+            .sendMessageButton {
+                background-color: #9b00b0;
+                color: white;
+                border-radius: 10px;
+                cursor: pointer;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                border: none;
+            }
             </style>
-                <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
+            <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
 
             <div class="comment-box">
-                <!-- radio buttons -->
-                <div class="radio-group">
-                    <input type="radio" id='theme2' name="theme" value="theme2">
-                    <label for="theme1">Theme 1</label>
-                    <input type="radio" id='theme3' name="theme" value="theme3">
-                    <label for="theme2">Social ...?..</label>
-                    <input type="radio" id='theme1' name="theme" value="theme1" checked>
-                    <label for="theme3">State Capacity</label>
-                </div>
-                <textarea placeholder="Write your comment..."></textarea>
-                <button>Send</button>
+            <div class="radio-group">
+            <div>
+    <input type="radio" id="theme2" name="theme" value="theme2">
+    <label for="theme2">Direitos e desenvolvimento social</label>
+</div>
+<div>
+    <input type="radio" id="theme3" name="theme" value="theme3">
+    <label for="theme3">Economia e sustentabilidade</label>
+</div>
+<div>
+    <input type="radio" id="theme1" name="theme" value="theme1" checked>
+    <label for="theme1">Democracia e soberania</label>
+</div>
+            </div>
+            <textarea placeholder="Write your comment..."></textarea>
+            <button class="sendMessageButton">Send</button>
             </div>
         `;
     }

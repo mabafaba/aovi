@@ -94,7 +94,7 @@ const createNewUser = async (userinfo, UserModelExtension) => {
   
   const loginUser = async (req, res, next) => {
     const { username, password } = req.body;
-  
+  console.log('logging in', username, password)
     // Check if username and password is provided
     if (!username || !password) {
       return res.status(400).json({

@@ -81,8 +81,9 @@ class MainNavigation extends HTMLElement {
 
             <style>
                 nav {
-                    position: fixed;
+                    position: relative;
                     padding: 10px;
+                    padding-top:20px;
                     top: 0;
                     left: 0;
                     display: flex;
@@ -158,6 +159,13 @@ class MainNavigation extends HTMLElement {
                 #backbutton {
 
                     cursor: pointer;
+                }
+
+
+                /* shadow below nav */
+
+                nav {
+                    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
                 }
 
             </style>

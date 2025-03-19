@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
     <style>
 
-        body html {
+        body, html {
             height: 100%;
             margin: 0;
             padding: 0;
@@ -46,25 +46,37 @@
             margin: 10px;
             border-radius: 10px;
             cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: none;
+            
         }
 
         .enterRoomButton:hover {
-            background-color: #9b00b0b7;
+            background-color: #740084b7;
             color: white;
             padding: 10px;
             margin: 10px;
             border-radius: 10px;
             cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+            transform: translateY(10px) !important;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom:40px;
         }
 
     </style>
 </head>
+
 <body>
+
     <div id="app">
         
-    
     </div>
-    <!-- <svg width="960" height="600"></svg> -->
+ 
+     <!-- <svg width="960" height="600"></svg> -->
     <script>
 
         const me = fetch('/aovi/user/me', {
@@ -90,10 +102,12 @@
 
 
         // insert <main-navigation back-url=....></main-navigation>
-        // document.querySelector('main-navigation').setAttribute('back-url', `/aovi/eventregistration/${eventId}`);
         
         const mainNavigation = `<main-navigation back-url="/aovi/eventregistration/id/${eventId}"></main-navigation>`;
-        document.getElementById('app').innerHTML = mainNavigation;
+        document.getElementById('app').innerHTML += mainNavigation;
+
+        const titleHtml = `<h1>Select Chapter</h1>`
+        document.getElementById('app').innerHTML += titleHtml;
 
         // fetch event data
         const eventData = fetch(`/aovi/rooms/id/${eventId}`, {
@@ -107,17 +121,36 @@
             console.log('Event data:', data);
             for(room in data.containsRooms){
                 console.log('Room:', room);
-                // add a div for each room, that is entered when clicked
-                const roomDiv = document.createElement('div');
-                // set classs
-                roomDiv.className = 'enterRoomButton';
-                roomDiv.innerHTML = data.containsRooms[room].name;
-                const roomid =  data.containsRooms[room]._id
+                // create a container div for each room
+                const roomContainer = document.createElement('div');
+                roomContainer.className = 'roomContainer';
+                roomContainer.style.border = '1px solid #ccc';
+                roomContainer.style.padding = '10px';
+                roomContainer.style.margin = '10px';
+                roomContainer.style.borderRadius = '10px';
                 
-                roomDiv.addEventListener('click', () => {
+                // create a label for the room name
+                const roomLabel = document.createElement('div');
+                roomLabel.className = 'roomLabel';
+                roomLabel.innerHTML = data.containsRooms[room].name;
+                roomLabel.style.marginBottom = '10px';
+                
+                // create an enter button for the room
+                const enterButton = document.createElement('button');
+                enterButton.className = 'enterRoomButton';
+                enterButton.innerHTML = 'ENTER';
+                const roomid = data.containsRooms[room]._id;
+                
+                enterButton.addEventListener('click', () => {
                     location.assign(`/aovi/event/${data._id}/room/${roomid}`);
                 });
-                document.getElementById('app').appendChild(roomDiv);
+                
+                // append the label and button to the container
+                roomContainer.appendChild(roomLabel);
+                roomContainer.appendChild(enterButton);
+                
+                // append the container to the app
+                document.getElementById('app').appendChild(roomContainer);
 
             }
         })

@@ -3,12 +3,18 @@ const userService = require("./services/users");
 const commentService = require("./services/comments"); // Import the commentService correctly
 const cookieParser = require('cookie-parser');
 const roomService = require("./services/rooms");
+const transcriptionService = require("./services/transcription");
 const qr = require('qr-image');
 const port = 3000;
 
-
+const { exec } = require('child_process');
+const fs = require('fs');
 const app = express();
 const server = require('http').createServer(app);
+
+const axios = require('axios');
+const FormData = require('form-data');
+
 const io = require('socket.io')(server,
     {
         path: "/aovi-socket-io",
@@ -71,6 +77,9 @@ redirectUnauthorized = (req, res, next) => {
 
 app.use('/aovi/comments', userService.authorizeBasic, redirectUnauthorized, commentService(io));
 app.use('/aovi/rooms', userService.authorizeBasic, redirectUnauthorized, roomService);
+// console.log('transcriptionService', transcriptionService);
+app.use('/aovi/transcription', transcriptionService);
+
 
 // Serve static files
 app.use('/aovi', express.static('client'));
@@ -116,6 +125,10 @@ app.get('/aovi/eventlist', userService.authorizeBasic, redirectUnauthorized, (re
 app.get('/aovi/evententry/:event', userService.authorizeBasic, redirectUnauthorized, (req, res) => {
     res.sendFile(__dirname + '/client/evententry.html');
 });
+
+
+
+
 
 
 

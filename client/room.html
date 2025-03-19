@@ -20,6 +20,9 @@
             height: 100%;
             margin: 0;
             padding: 0;
+            width: 100%;
+            overflow: hidden;
+
         }
 
         #app {
@@ -27,6 +30,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            overflow: hidden;
         }
         .links line {
             stroke: #999;
@@ -53,14 +57,18 @@
             font-size: 20px;
             font-weight: bold;
             text-align: center;
+            margin-bottom:30px;
             border-radius:10px;
         }
         
         #question {
-            background-color: #9b00b0;
-            color: white;
+            
+            border-color: #9b00b0;
+            border: 1px dotted #9b00b0;
+            margin-top:30px;
+            color: #9b00b0;
             position: relative;
-            font-size: 20px;
+            font-size: 15px;
             font-weight: bold;
             text-align: center;
             margin-top: 20px;
@@ -69,6 +77,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            /* thin text */
+            font-weight:200;
+
         }
 
         display-comments-as-chat {
@@ -78,7 +89,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 45%;
+            height: 35%;
         }
         
         comment-input {
@@ -87,9 +98,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 20%;
+            height: 15%;
             width:95%;
         }
+
+
+
 
     
         

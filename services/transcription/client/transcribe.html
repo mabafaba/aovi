@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Recorder!!!</title>
+    <!-- <script src="audiorecorder.js" defer></script> -->
+    <script src="voicelistener.js" defer></script>
+    <script src="voicetranscriber.js" defer></script>
+    
+    <!-- wavesurver from cdn -->
+     <!-- <script src="https://unpkg.com/wavesurfer.js"></script> -->
+     <!-- fontawesome cdn-->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+     <script src="vad.js"></script>
+    
+    <script>
+        async function getAudioBlob() {
+            // Implement the logic to get the recorded audio blob
+            // This is a placeholder implementation
+            return new Blob();
+        }
+    </script>
+</head>
+<body>
+    <!-- <h3>Audio Recorder</h3> -->
+    <!-- <audio-recorder></audio-recorder> -->
+    <!-- <h3>Voice Activation</h3> -->
+     <!-- <voice-listener></voice-listener> -->
+    <!-- placeholder div with vertical space -->
+    <div style="height: 20px;"></div>
+    <div id="transcriptionContainer"></div>
+    <!-- <div id="loadingOverlay" style="display: none;">
+        <div>Loading...</div>
+    </div>
+    <label class="switch">
+        <input type="checkbox" id="toggleVoiceListener">
+        <span class="slider round">transcribe automatically</span>
+    </label> -->
+    <voice-transcriber></voice-transcriber>
+</body>
+</html>
+
+<style>
+    #loadingOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #loadingOverlay div {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+    }
+    audio-recorder {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .transcription {
+        /* align center, 50% of screen dark blue backgroiund, white text,round corners */
+        text-align: center;
+        background-color: #1e90ff;
+        color: white;
+        border-radius: 5px;
+        padding: 10px;
+        margin-top: 10px;
+
+        
+    }
+</style>
+<script>
+
+
+// // toggle voice listener
+// document.getElementById('toggleVoiceListener').addEventListener('change', (event) => {
+//     const voiceListener = document.querySelector('voice-listener');
+//     if (event.target.checked) {
+//         voiceListener.startListening();
+//     } else {
+//         voiceListener.stopListening();
+//     }
+// });
+
+// function startLoading() {
+//     document.getElementById('loadingOverlay').style.display = 'flex';
+// }
+// function stopLoading() {
+//     document.getElementById('loadingOverlay').style.display = 'none';
+// }
+
+// transcribe = async () => {
+//     console.log('Transcribing...');
+//     // startLoading();
+//     const audioBlob = await audiorecorder.getAudioBlob(); // Assume this function gets the recorded audio blob
+//     const formData = new FormData();
+//     formData.append('audio', audioBlob, 'recording.wav');
+
+//     const response = await fetch('/aovi/transcription', {
+//         method: 'POST',
+//         body: formData
+//     });
+
+//     if (response.ok) {
+//         const transcription = await response.text();
+//         document.getElementById('transcription').innerText = transcription;
+//         stopLoading();
+
+//     } else {
+//         stopLoading();
+//         document.getElementById('transcription').innerText = 'Transcription failed';
+//         console.error('Transcription failed');
+//     }
+// }
+
+
+// transcribeAudioBlob = async (audioBlob) => {
+//     console.log('Transcribing...');
+//     // startLoading();
+//     const formData = new FormData();
+//     formData.append('audio', audioBlob, 'recording.wav');
+
+//     const response = await fetch('/aovi/transcription', {
+//         method: 'POST',
+//         body: formData
+//     });
+
+//     if (response.ok) {
+//         const transcription = await response.text();
+//         // document.getElementById('transcription').innerText = transcription;
+//         // append div with transcription
+//         const transcriptionDiv = document.createElement('div');
+//         transcriptionDiv.innerText = transcription;
+//         // add class
+//         transcriptionDiv
+//             .classList
+//             .add('transcription');
+//         document
+//             .getElementById('transcriptionContainer')
+//             .appendChild(transcriptionDiv);
+//         stopLoading();
+//         return transcription;
+//     } else {
+//         document.getElementById('transcription').innerText = 'Transcription failed';
+//         console.error('Transcription failed');
+//     }
+//     stopLoading();
+// }
+
+// //
+// document.addEventListener('DOMContentLoaded', () => {
+//     const audiorecorder = document.querySelector('audio-recorder');
+//     console.log('audiorecorder', audiorecorder);
+
+//     audiorecorder.onStopRecording(async () => {
+//         const audioBlob = await audiorecorder.getAudioBlob();
+//         // transcribeAudioBlob(audioBlob);
+//         console.log('stopped recording, audioBlob', audioBlob);
+//         console.log('transcribing...');
+//         transcription = await transcribeAudioBlob(audioBlob);
+
+//     });
+// });
+
+
+// // listen for 'voiceStart' and 'voiceStop' events
+// const voiceListener = document.querySelector('voice-listener');
+// const audiorecorder = document.querySelector('audio-recorder');
+
+// var timeRecordingStarted = 0;
+// voiceListener.addEventListener('voiceStart', (event) => {
+//     console.log('Voice started, recording');
+//     if(timeRecordingStarted === 0) {
+//         audiorecorder.startRecording();
+//         timeRecordingStarted = new Date();
+//     }
+// });
+
+// voiceListener.addEventListener('voiceStop', (event) => {
+
+
+//     const recordingDuration = new Date() - timeRecordingStarted;
+
+//     if (recordingDuration < 1000 * 15) { // after 30 seconds, look for voice stop to transcribe
+//         console.log('Recording duration too short, not transcribing');
+//         return;
+//     }
+//     timeRecordingStarted = 0;
+//     audiorecorder.stopRecording();
+//     audiorecorder.startRecording();
+
+// });
+
+
+</script>

@@ -12,17 +12,18 @@
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
     <style>
 
-        body html {
+        body,html {
             height: 100%;
             margin: 0;
             padding: 0;
+            overflow: hidden;
         }
 
         #app {
             position: relative;
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            height: 100%;
         }
 
 
@@ -40,15 +41,21 @@
         }
 
         .enterRoomButton {
+            position:absolute;
+            bottom:10%;
+
+            left: 10%;
+            right: 10%;
             background-color: #9b00b0;
             color: white;
             padding: 10px;
             margin: 10px;
-            margin-bottom: 100px;
             border-radius: 10px;
             cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: none;
+            
         }
-
         .enterRoomButton:hover {
             background-color: #9b00b0b7;
             color: white;
@@ -63,13 +70,28 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100%;
+            height: 30%;
             width: 100%;
         }
 
         input {
             margin: 30px;
+            margin-bottom:50px;
             display: inline-block;
+        }
+
+        select {
+            position:relative;
+            margin-bottom:30px;
+            left: 0%;
+            right: 10%;
+            width: 80%;
+        }
+
+
+        h1 {
+            text-align: center;
+            margin-bottom:40px;
         }
 
     </style>
@@ -77,6 +99,7 @@
 <body>
     <div id="app">
         <main-navigation></main-navigation>
+        <h1>About you</h1>
         <div id="userGroupInput"></div>
         <button class="enterRoomButton">JOIN</button>
     

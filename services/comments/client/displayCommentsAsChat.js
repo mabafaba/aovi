@@ -71,7 +71,7 @@ class CommentsAsChat extends HTMLElement {
         const htmlstring = `
             <div class='commentBubble'>
             <div class='time'>${new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                <p>${comment.text}</p>
+                <p class="commentmaintext">${comment.text}</p>
                 <div class="reaction-buttons">
                 <button id="disagree-button">Disagree</button><button id="neutral-button">Neutral</button><button id="agree-button">Agree</button>
                 </div>
@@ -218,10 +218,10 @@ class CommentsAsChat extends HTMLElement {
 
             .comment {
                 position: relative;
-                background-color: rgba(217, 217, 217, 0.76);
+                background-color: rgba(234, 234, 234, 0.76);
                 width: 90%;
                 padding: 10px;
-                border-radius: 20px;
+                border-radius: 40px;
                 border-bottom-right-radius: 0;
                 margin-bottom: 10px;
                 height: 80%;
@@ -280,6 +280,19 @@ class CommentsAsChat extends HTMLElement {
 
             .passive-button {
                 filter: saturate(50%) brightness(50%);
+            }
+
+            .time {
+                font-size:9px;
+                color:#99999;
+                text-align:right;
+                padding-right:5px;
+            }
+
+            .commentmaintext {
+                font-size:16px;
+                padding:20px;
+                text-align:right;
             }
             
             </style>
