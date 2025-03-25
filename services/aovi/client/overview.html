@@ -300,6 +300,28 @@ async function init() {
             const themes = room.data.themes;
             console.log('User categories:', userCategories);
 
+            categoricalFilterCheckbox = function(category){
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = category;
+                checkbox.value = category;
+                checkbox.id = category;
+                checkbox.innerHTML = category;
+                checkbox.checked = true;
+
+                // event listener
+                checkbox.addEventListener('change', (event) => {
+                    console.log('Checkbox changed:', event.target.value);
+                });
+
+                return checkbox;
+
+            }
+
+            userCategories.forEach(category => {
+               
+            });
+
             roomDiv.appendChild(sortingInput);
 
             sortComments = (comments, sortOption) => {
@@ -393,12 +415,23 @@ async function init() {
                 });
             });
 
+            updateCommentDisplay = function(){
+                const sortedComments = sortComments(room.comments, sortingInput.value);
+                roomDiv.innerHTML = '';
+                roomDiv.appendChild(roomTitle);
+                roomDiv.appendChild(sortingInput);
+                sortedComments.forEach(comment => {
+                    const commentDiv = commentAsHtmlDiv(comment);
+                    roomDiv.appendChild(commentDiv);
+                });
+            }
+
             roomDiv.appendChild(sortingInput);
 
             // set input to most agreed
             sortingInput.value = 'Most Agreed';
             sortingInput.dispatchEvent(new Event('change'));
-
+            setLanguage();
 
 
 
@@ -409,6 +442,7 @@ async function init() {
             app.appendChild(roomDiv);
         })
 
+        setLanguage();
     }
 
     init();
