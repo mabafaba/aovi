@@ -74,7 +74,7 @@ const aoviService = function(io){
         console.log('originalUrl', originalUrl);
         console.log('completeUrl', completeUrl);
     
-        const targetLink = protocol + '://' + host + '/aovi/events/' + req.params.event;
+        const targetLink = protocol + '://' + host + '/aovi/views/events/' + req.params.event;
     
         const code = qr.image(targetLink, { type: 'png' });
         res.setHeader('Content-type', 'image/png');
