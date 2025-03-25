@@ -48,6 +48,7 @@
     </div>
 
     <input type="text" id="speakerName" placeholder="Speaker Name"><br>
+    <button id="activateMicrophone">Activate Microphone</button>
     
     
     <voice-transcriber show-button="false"></voice-transcriber>
@@ -213,5 +214,19 @@ document.addEventListener('transcription', (event) => {
     });
 });
     
+
+// event listener on activate microphone button - request permission to use microphone
+
+const activateMicrophoneButton = document.getElementById('activateMicrophone');
+
+activateMicrophoneButton.addEventListener('click', async () => {
+    console.log('activate microphone button clicked');
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    // if allowed, remove button
+    if (stream) {
+        activateMicrophoneButton.remove();
+    }
+})
     
 </script>
