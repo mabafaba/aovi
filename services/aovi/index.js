@@ -26,7 +26,7 @@ const aoviService = function(io){
     });
 
     router.get('/views/events/create', userService.authorizeBasic, redirectUnauthorized, (req, res) => {
-        res.sendFile(__dirname + '/client/createEvent.html');
+        res.sendFile(__dirname + '/client/createevent.html');
     });
     
     router.get('/views/events/:event', userService.authorizeBasic, redirectUnauthorized, (req, res) => {
