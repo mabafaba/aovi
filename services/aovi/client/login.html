@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <script src="/aovi/user/static/authForm.js"></script>
+    <script src="/aovi/static/languagepicker.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
+    <script src="/aovi/static/navigation.js"></script>
+    <link rel="stylesheet" href="/aovi/static/style.css">
+    
+    
+</head>
+
+<body>
+<main-navigation></main-navigation>
+    
+</body>
+
+
+<script>
+
+
+const urlParams = new URLSearchParams(window.location.search);
+var targetUrl = urlParams.get('targeturl');
+console.log('target url', targetUrl);
+// make sure target url string points to a view (e.g. /aovi/views...)
+if (!targetUrl || !targetUrl.includes('views')) {
+    targetUrl = '/aovi/views/events';
+}
+
+// set as target-url
+// console.log('setting target url', targetUrl);
+// document.querySelector('authentication-form').setAttribute('target-url', targetUrl);
+
+fetch('/aovi/user/me')
+.then(async response => {
+    if (response.status === 200) {
+        const body = document.querySelector('body');
+        const data = await response.json();
+        body.innerHTML += `  <p>Logged in as ${data.name}</p>`
+        const logoutButton = document.createElement('button');
+        logoutButton.innerText = 'Logout';
+        logoutButton.onclick = () => {
+            fetch('/aovi/user/logout', {method: 'GET'})
+            .then(response => {
+                // refresh page
+                window.location.href = window.location.href;
+            })
+        }
+        body.appendChild(logoutButton);
+        
+    } else {
+        const body = document.querySelector('body');
+        body.innerHTML += `<authentication-form
+            login-endpoint="/aovi/user/login"
+            register-endpoint="/aovi/user/register"
+            target-url="${targetUrl}"
+            ></authentication-form>`
+
+    }
+    return response;
+    }).catch(error => {console.error('error', error);})
+
+</script>
+</html>

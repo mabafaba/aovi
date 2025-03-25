@@ -6,7 +6,100 @@ class CommentsAsChat extends HTMLElement {
 
         this.render();
         this.room = 'default-room';
+
+
+        this.translations = {
+            'en': {
+                'Disagree': 'Disagree',
+                'Neutral': 'Neutral',
+                'Agree': 'Agree'
+            },
+            'de': {
+                'Agree': 'stimme zu',
+                'Neutral': 'neutral',
+                'Disagree': 'stimme nicht zu'
+            },
+            'es': {
+                'Agree': 'de acuerdo',
+                'Neutral': 'neutral',
+                'Disagree': 'en desacuerdo'
+            },
+            'fr': {
+                'Agree': 'd\'accord',
+                'Neutral': 'neutre',
+                'Disagree': 'pas d\'accord'
+            },
+            'pt': {
+                'Agree': 'concordo',
+                'Neutral': 'neutro',
+                'Disagree': 'discordo'
+            }
+        };
     
+
+
+        const translator = function (translations, onLanguageChange, scope = document) {
+            if (!onLanguageChange) {
+                onLanguageChange = () => {};
+            }
+
+            const observer = new MutationObserver(() => {
+                const lang = document.documentElement.lang || 'en';
+                localStorage.setItem('lang', lang);
+
+                // Select elements only within the given scope
+                const elements = scope.querySelectorAll('[data-translator-text]');
+                elements.forEach((element) => {
+                    const key = element.getAttribute('data-translator-text');
+                    if (!translations[lang] || !translations[lang][key]) {
+                        console.warn(`No translation found for key: ${key} in language: ${lang}`);
+                        element.innerText = key;
+                    } else {
+                        element.innerText = translations[lang][key];
+                    }
+                });
+
+                // Handle attributes prefixed with data-translator-*
+                scope.querySelectorAll('[data-translator-]').forEach((element) => {
+                    Array.from(element.attributes).forEach(attr => {
+                        if (attr.name.startsWith('data-translator-')) {
+                            const key = attr.value;
+                            const attributeName = attr.name.replace('data-translator-', '');
+                            let translation = translations[lang]?.[key] || key;
+
+                            if (attributeName === 'text') {
+                                element.innerText = translation;
+                            } else {
+                                element.setAttribute(attributeName, translation);
+                            }
+                        }
+                    });
+                });
+
+                onLanguageChange();
+            });
+
+            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
+            let lang = getPreferredLanguage();
+            if (!translations[lang]) {
+                console.warn(`Language ${lang} not available`);
+                lang = 'en';
+            }
+            document.documentElement.lang = lang;
+
+            return (key) => {
+                const lang = document.documentElement.lang || 'en';
+                return translations[lang]?.[key] || key;
+            };
+        };
+
+
+
+    this.t = translator(this.translations, () => {
+        console.log('Language changed');
+        // this.render();
+    }, this.shadowRoot);
     }
 
     async connectedCallback() {
@@ -36,6 +129,7 @@ class CommentsAsChat extends HTMLElement {
                 const commentHTML = this.generateCommentHTML(comment);
                 this.shadowRoot.getElementById('comments-container').appendChild(commentHTML);
             }
+
             this.scrollToBottom();
             
             this.shadowRoot.querySelectorAll('.reaction-buttons button').forEach(button => {
@@ -51,6 +145,8 @@ class CommentsAsChat extends HTMLElement {
         }
         this.listenForNewComments();
         this.observeCommentContainer();
+        // trigger translation
+        document.documentElement.lang = document.documentElement.lang;
     }
 
     observeCommentContainer() {
@@ -65,6 +161,8 @@ class CommentsAsChat extends HTMLElement {
         this.comments.push(comment);
         const commentHTML = this.generateCommentHTML(comment);
         this.shadowRoot.getElementById('comments-container').appendChild(commentHTML);
+        // update translation
+        document.documentElement.lang = document.documentElement.lang;
     }
 
     generateCommentHTML(comment) {
@@ -73,7 +171,7 @@ class CommentsAsChat extends HTMLElement {
             <div class='time'>${new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                 <p class="commentmaintext">${comment.text}</p>
                 <div class="reaction-buttons">
-                <button id="disagree-button">Disagree</button><button id="neutral-button">Neutral</button><button id="agree-button">Agree</button>
+                <button id="disagree-button" data-translator-text="Disagree"></button><button id="neutral-button" data-translator-text="Neutral"></button><button id="agree-button" data-translator-text="Agree"></button>
                 </div>
             </div>
                 `;
@@ -174,7 +272,10 @@ class CommentsAsChat extends HTMLElement {
                     'Content-Type': 'application/json'
                 }
             });
-            return await response.json();
+            console.log('response', response);
+            const comments = await response.json();
+            console.log('comments', comments);
+            return comments;
         } catch (error) {
             console.error(error);
             return [];
@@ -208,22 +309,23 @@ class CommentsAsChat extends HTMLElement {
 
     render() {
         this.shadowRoot.innerHTML = `
-            <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
 
-        <link rel="stylesheet" href="https://newcss.net/theme/terminal.css"> 
             <style>
             .comment:last-child {
                 border-bottom: none;
             }
 
             .comment {
+                color:white;
+                float:right;
                 position: relative;
-                background-color: rgba(234, 234, 234, 0.76);
-                width: 90%;
-                padding: 10px;
+                background-color: rgba(31, 31, 31, 0.76);
+                width: 80%;
+                padding: 20px;
                 border-radius: 40px;
                 border-bottom-right-radius: 0;
-                margin-bottom: 10px;
+                margin-bottom: 10%;
+                margin-height:10%;
                 height: 80%;
                 display: flex;
                 flex-direction: column;

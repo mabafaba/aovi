@@ -7,7 +7,10 @@
     <!-- <script src="audiorecorder.js" defer></script> -->
     <script src="voicelistener.js" defer></script>
     <script src="voicetranscriber.js" defer></script>
-    
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+    <!-- sacura -->
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
     <!-- wavesurver from cdn -->
      <!-- <script src="https://unpkg.com/wavesurfer.js"></script> -->
      <!-- fontawesome cdn-->
@@ -37,7 +40,18 @@
         <input type="checkbox" id="toggleVoiceListener">
         <span class="slider round">transcribe automatically</span>
     </label> -->
-    <voice-transcriber></voice-transcriber>
+    <!-- speaker name input -->
+    <div id="recorderIcon">
+        <i class="fas fa-microphone"></i>
+        <br>
+        <span id="statedescription">not transcribing</span>     
+    </div>
+
+    <input type="text" id="speakerName" placeholder="Speaker Name"><br>
+    
+    
+    <voice-transcriber show-button="false"></voice-transcriber>
+
 </body>
 </html>
 
@@ -63,6 +77,14 @@
         margin: 0 auto;
     }
 
+    input[type="text"] {
+        /* round corners, padding, margin */
+        border-radius: 5px;
+        padding: 5px;
+        margin: 5px;
+        border: none;
+        width: 100%;
+    }
     .transcription {
         /* align center, 50% of screen dark blue backgroiund, white text,round corners */
         text-align: center;
@@ -71,131 +93,125 @@
         border-radius: 5px;
         padding: 10px;
         margin-top: 10px;
+    }
 
+    button {
+        /* round corners, padding, margin */
+        border-radius: 5px;
+        padding: 5px;
+        margin: 5px;
+        border: none;
+        background-color: rgb(0, 132, 255);
+    }
+
+    button:hover {
+        /* change color on hover */
+        background-color: rgb(0, 80, 205);
+    }
+    #recorderIcon{
+        position:relative;
+        text-align: center;
+        font-size: 50px;
+        color: gray;
+        margin-bottom:30px;
+
+    }
+
+
+    #statedescription {
+        text-align: center;
+        font-size: 30px;
+        color: gray;
+        padding-bottom: 50px;
+    }
+
+
+    .activeAnimation i {
+        animation: pulse 1s infinite;
         
     }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(2);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
 </style>
 <script>
+const socket = io({ path: '/aovi-socket-io' });
+
+document.getElementById('speakerName').addEventListener('input', (event) => {
+    const speakerName = event.target.value;
+    console.log('speaker name changed', speakerName);
+    socket.emit('transcription: speaker name changed', { name: speakerName });
+});
 
 
-// // toggle voice listener
-// document.getElementById('toggleVoiceListener').addEventListener('change', (event) => {
-//     const voiceListener = document.querySelector('voice-listener');
-//     if (event.target.checked) {
-//         voiceListener.startListening();
-//     } else {
-//         voiceListener.stopListening();
-//     }
-// });
+socket.on('connect', () => {
+    const name = document.getElementById('speakerName').value;
+    socket.emit('transcription: speaker connected', { id: socket.id, name: name });
+});
 
-// function startLoading() {
-//     document.getElementById('loadingOverlay').style.display = 'flex';
-// }
-// function stopLoading() {
-//     document.getElementById('loadingOverlay').style.display = 'none';
-// }
+// listen for voiceStart and voiceStop events
+document.addEventListener('voiceStart', () => {
+    console.log('voiceStart event, emit speaker started speaking');
+    socket.emit('transcription: speaker started speaking', { id: socket.id });
+});
 
-// transcribe = async () => {
-//     console.log('Transcribing...');
-//     // startLoading();
-//     const audioBlob = await audiorecorder.getAudioBlob(); // Assume this function gets the recorded audio blob
-//     const formData = new FormData();
-//     formData.append('audio', audioBlob, 'recording.wav');
-
-//     const response = await fetch('/aovi/transcription', {
-//         method: 'POST',
-//         body: formData
-//     });
-
-//     if (response.ok) {
-//         const transcription = await response.text();
-//         document.getElementById('transcription').innerText = transcription;
-//         stopLoading();
-
-//     } else {
-//         stopLoading();
-//         document.getElementById('transcription').innerText = 'Transcription failed';
-//         console.error('Transcription failed');
-//     }
-// }
+document.addEventListener('voiceStop', () => {
+    console.log('voiceStop event, emit speaker stopped speaking');
+    socket.emit('transcription: speaker stopped speaking', { id: socket.id });
+});
 
 
-// transcribeAudioBlob = async (audioBlob) => {
-//     console.log('Transcribing...');
-//     // startLoading();
-//     const formData = new FormData();
-//     formData.append('audio', audioBlob, 'recording.wav');
+// liste for transcription: start transcribing
+socket.on('transcription: start transcribing', (data) => {
+    // is me?
+    if (data.id === socket.id) {
+        console.log('received instruction to start transcribing');
+        const voiceTranscriber = document.querySelector('voice-transcriber');
+        voiceTranscriber.startListening();
+        // update explanation text
+        document.getElementById('statedescription').innerText = "Transcribing...";
+        // add activeAnimation class to recorderIcon
+        document.getElementById('recorderIcon').classList.add('activeAnimation');
+    } else {
+        console.log('received instruction to start transcribing, but not me');
+        const noticeText = 'transcribing for ' + data.name;
+        document.getElementById('statedescription').innerText = noticeText;
+        // remove activeAnimation class from recorderIcon
+        document.getElementById('recorderIcon').classList.remove('activeAnimation');
 
-//     const response = await fetch('/aovi/transcription', {
-//         method: 'POST',
-//         body: formData
-//     });
+    }
+});
 
-//     if (response.ok) {
-//         const transcription = await response.text();
-//         // document.getElementById('transcription').innerText = transcription;
-//         // append div with transcription
-//         const transcriptionDiv = document.createElement('div');
-//         transcriptionDiv.innerText = transcription;
-//         // add class
-//         transcriptionDiv
-//             .classList
-//             .add('transcription');
-//         document
-//             .getElementById('transcriptionContainer')
-//             .appendChild(transcriptionDiv);
-//         stopLoading();
-//         return transcription;
-//     } else {
-//         document.getElementById('transcription').innerText = 'Transcription failed';
-//         console.error('Transcription failed');
-//     }
-//     stopLoading();
-// }
-
-// //
-// document.addEventListener('DOMContentLoaded', () => {
-//     const audiorecorder = document.querySelector('audio-recorder');
-//     console.log('audiorecorder', audiorecorder);
-
-//     audiorecorder.onStopRecording(async () => {
-//         const audioBlob = await audiorecorder.getAudioBlob();
-//         // transcribeAudioBlob(audioBlob);
-//         console.log('stopped recording, audioBlob', audioBlob);
-//         console.log('transcribing...');
-//         transcription = await transcribeAudioBlob(audioBlob);
-
-//     });
-// });
+socket.on('transcription: stop transcribing', () => {
+    console.log("received instruction to stop transcribing");
+    const voiceTranscriber = document.querySelector('voice-transcriber');
+    voiceTranscriber.stopListening();
+    // update explanation text
+    document.getElementById('statedescription').innerText = "not transcribing";
+    // remove activeAnimation class from recorderIcon
+    document.getElementById('recorderIcon').classList.remove('activeAnimation');
+});
 
 
-// // listen for 'voiceStart' and 'voiceStop' events
-// const voiceListener = document.querySelector('voice-listener');
-// const audiorecorder = document.querySelector('audio-recorder');
-
-// var timeRecordingStarted = 0;
-// voiceListener.addEventListener('voiceStart', (event) => {
-//     console.log('Voice started, recording');
-//     if(timeRecordingStarted === 0) {
-//         audiorecorder.startRecording();
-//         timeRecordingStarted = new Date();
-//     }
-// });
-
-// voiceListener.addEventListener('voiceStop', (event) => {
-
-
-//     const recordingDuration = new Date() - timeRecordingStarted;
-
-//     if (recordingDuration < 1000 * 15) { // after 30 seconds, look for voice stop to transcribe
-//         console.log('Recording duration too short, not transcribing');
-//         return;
-//     }
-//     timeRecordingStarted = 0;
-//     audiorecorder.stopRecording();
-//     audiorecorder.startRecording();
-
-// });
-
-
+// listen for standard dom event 'transcription'
+document.addEventListener('transcription', (event) => {
+    const transcription = event.detail;
+    console.log('transcription event', transcription);
+    socket.emit('transcription: speaker transcribed', { 
+        speaker: { id: socket.id, name: document.getElementById('speakerName').value },
+        transcription: transcription
+    });
+});
+    
+    
 </script>

@@ -35,7 +35,9 @@ publicCommentData = function(comment, recipientUserId){
 
     console.log('myReaction', myReaction);
 
-    
+    // userCategories: data ? data.userCategories ? data.userCategories : {} : {}
+
+    const data = comment.data ? comment.data : {};
     const pc =  {
         _id: comment._id,
         text: comment.text,
@@ -45,9 +47,10 @@ publicCommentData = function(comment, recipientUserId){
         usersAgree: comment.usersAgree.length,
         usersDisagree: comment.usersDisagree.length,
         usersNeutral: comment.usersNeutral.length,
-        myReaction: myReaction
+        myReaction: myReaction,
+        data: data
 
-}
+    }
 console.log('publicComment', pc);
 return pc;
 }
@@ -92,13 +95,19 @@ router.post('/', async (req, res) => {
     if(req.body.user && req.body.user.id){
     req.body.user.id = sanitizeHtml(req.body.user.id.toString(), sanitizeOptions);
     }
+
+    let data = {};
+    if(req.body.data){
+        data = req.body.data;
+    }
     
 
     try {
         const commentData = {
             text: req.body.text,
             author: req.body.user.id,
-            room: req.body.room
+            room: req.body.room,
+            data: data
         }
         const comment = new Comment(commentData);
         await comment.save();
@@ -130,10 +139,10 @@ router.get('/', async (req, res) => {
 
 
 // Read comments by room name
-router.get('/room/:name', async (req, res) => {
-    console.log('get comments by room', req.params.name);
+router.get('/room/:id', async (req, res) => {
+    console.log('get comments by room', req.params.id);
     try {
-        const comments = await Comment.find({ room: req.params.name });
+        const comments = await Comment.find({ room: req.params.id });
         if (!comments.length) {
             res.status(200).send([]);
             return;

@@ -13,16 +13,37 @@ class LiveTranscription extends HTMLElement {
         this.transcriptionContainer = null;
         this.recordingStartTime = 0;
         this.transcriptionCounter = 0;
+        this.showButton = true;
+        this.showLanguageSelect = true;
     }
 
     connectedCallback() {
         console.log('connected voice-transcriber');   
         this.render();
         this.addEventListeners();
+        // get show-button attribute
+        if (this.getAttribute('show-button') === 'false') {
+            this.showButton = false;
+        } else {
+            this.showButton = true;
+        }
+        // get show-language-select attribute
+        if (this.getAttribute('show-language-select') === 'false') {
+            this.showLanguageSelect = false;
+        } else {
+            this.showLanguageSelect = true;
+        }
+        if (!this.showButton) {
+            this.querySelector('#toggleTranscription').style.display = 'none';
+        }
+        if (!this.showLanguageSelect) {
+            this.querySelector('#languageSelect').style.display = 'none';
+        }
     }
 
     render() {
         this.innerHTML = `
+            <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
             <button id="toggleTranscription">Start Transcription</button>
             <select id="languageSelect">
                 <option value="en">English</option>
@@ -77,107 +98,103 @@ class LiveTranscription extends HTMLElement {
     }
 
     addEventListeners() {
-        this.querySelector('#toggleTranscription')?.addEventListener('click', this.toggleTranscription.bind(this));
+        this.querySelector('#toggleTranscription')?.addEventListener('click', this.toggleListening.bind(this));
     }
 
-    toggleTranscription() {
-        console.log('toggleTranscription');
+    toggleListening() {
         if (this.recording) {
             this.stopListening();
         } else {
             this.startListening();
-            this.startRecording();
         }
     }
 
-    startListening() {
-        console.log('startListening');
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-                this.audioContext = new AudioContext();
-                const source = this.audioContext.createMediaStreamSource(stream);
-                this.stream = stream;
-                this.vad = new VAD({
-                    source: source,
-                    voice_start: () => {
-                        
-                        const timeSinceRecordingStart = Date.now() - this.recordingStartTime;
-                        if (timeSinceRecordingStart === 0) {
-                            this.timeSinceRecordingStart = Date.now();
-                            this.startRecording();
-                            console.log('voice_start - effectiive');
-                            return;
-                        }
-                        console.log('voice_start - ineffective');
-                        
-                    },
-                    voice_stop: () => {
-                        const timeSinceRecordingStart = Date.now() - this.recordingStartTime;
-                        if (timeSinceRecordingStart > 1000 * 2) {
-                            this.recordingStartTime = 0;
-                            this.stopRecording();
-                            this.startRecording();
-                            console.log('voice_stop - effective');
-                            return;
-                        }
-                        console.log('voice_stop - ineffective');
-                        
-                    }
-                });
-                this.recording = true;
-                this.querySelector('#toggleTranscription').textContent = 'Stop Transcription';
-                // set class for transcription button
-                this.querySelector('#toggleTranscription').classList.add('recording');
+    async startListening() {
+        if(this.recording){
+            console.warn('already recording');
+            // return rejected promise
+            return Promise.reject();
+        }
+        this.recording = true;
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // start recording audio data into audiochunks
+            this.recordingStartTime = Date.now();
+            this.audioChunks = [];
+            this.mediaRecorder = new MediaRecorder(stream);
+            this.mediaRecorder.ondataavailable = event => {
+                this.audioChunks.push(event.data);
+            };
+            this.mediaRecorder.onstop = () => {
+                console.log('recording stopped, transcribing...');
+                this.audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                this.transcribeAudioBlob(this.audioBlob);
+                // reset audioChunks
+                this.audioChunks = [];
+            };
+            this.mediaRecorder.start();
 
+            // listen for pauses in speech to split transcription into chunks
+            this.audioContext = new AudioContext();
+            const source = this.audioContext.createMediaStreamSource(stream);
+            this.stream = stream;
+            this.vad = new VAD({
+                source: source,
+                voice_start: () => {
+                    if (this.vad) {
+                        const event = new CustomEvent('voiceStart', { detail: { timestamp: Date.now() } });
+                        document.dispatchEvent(event);
+                    }
+                },
+                voice_stop: () => {
+                    if (this.vad) {
+                        const event = new CustomEvent('voiceStop', { detail: { timestamp: Date.now() } });
+                        document.dispatchEvent(event);
+
+                        const timeSinceRecordingStart = Date.now() - this.recordingStartTime;
+                        if (timeSinceRecordingStart > 1000 * 15) {
+                            this.stopListening();
+                            this.startListening();
+                            console.log('new transcription chunk');
+                            return;
+                        }
+                    }
+                }
             });
+            this.querySelector('#toggleTranscription').textContent = 'Stop Transcription';
+            // set class for transcription button
+            this.querySelector('#toggleTranscription').classList.add('recording');
+        } catch (error) {
+            console.error('Error accessing media devices.', error);
+            this.recording = false;
+        }
     }
 
     stopListening() {
-        console.log('stopListening');
+
+        this.recording = false;
+
+        if (this.mediaRecorder) {
+            this.mediaRecorder.stop();
+        }
+
         if (this.vad) {
             this.vad.destroy();
             this.vad = null;
         }
+
         if (this.audioContext) {
             this.audioContext.close();
             this.audioContext = null;
         }
+
         if (this.stream) {
             this.stream.getTracks().forEach(track => track.stop());
             this.stream = null;
         }
-        this.recording = false;
+
         this.querySelector('#toggleTranscription').textContent = 'Start Transcription';
         this.querySelector('#toggleTranscription').classList.remove('recording');
-
-        this.stopRecording();
-    }
-
-    startRecording() {
-        console.log('startRecording');
-        this.recordingStartTime = Date.now();
-        this.audioChunks = [];
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-                this.mediaRecorder = new MediaRecorder(stream);
-                this.mediaRecorder.ondataavailable = event => {
-                    this.audioChunks.push(event.data);
-                };
-                this.mediaRecorder.onstop = () => {
-                    this.audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
-                    this.transcribeAudioBlob(this.audioBlob);
-                    // reset audioChunks
-                    this.audioChunks = [];
-                };
-                this.mediaRecorder.start();
-            });
-    }
-
-    stopRecording() {
-        console.log('stopRecording');
-        if (this.mediaRecorder) {
-            this.mediaRecorder.stop();
-        }
     }
 
     async transcribeAudioBlob(audioBlob) {
@@ -212,7 +229,20 @@ class LiveTranscription extends HTMLElement {
             console.log('...transcribed');
             
             transcriptionDiv.classList.remove('transcriptionLoading');
-            transcriptionDiv.innerText = await response.text();
+            const text = await response.text();
+
+            // emit event with transcription
+            const event = new CustomEvent('transcription', { detail: {text:text, requestedAt: transcriptionStartTimestamp} });
+            document.dispatchEvent(event);
+
+            if(text.length > 0) {
+                transcriptionDiv.innerText = text;
+            }
+            else {
+                // remove div
+                transcriptionDiv.remove();
+            }
+            
            
         } else {
             console.error('Transcription failed');

@@ -7,13 +7,14 @@
     <title>Event</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
-    <script src="/aovi/navigation.js"></script>
-    <script src="/aovi/tabletags.js"></script>
-    <!-- classless sakura -->
-    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
+    <script src="/aovi/static/navigation.js"></script>
+    <script src="/aovi/static/tabletags.js"></script>
+
+    <link rel="stylesheet" href="/aovi/static/style.css">
+
     <style>
 
-        body html {
+        body, html {
             height: 100%;
             margin: 0;
             padding: 0;
@@ -23,7 +24,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            overflow-y:scroll;
         }
 
 
@@ -39,6 +40,19 @@
             text-align: center;
             border-radius:10px;
         }
+
+        input {
+            margin-bottom:30px;
+        }
+
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        
     </style>
 </head>
 <body>
@@ -75,6 +89,21 @@
             </div>
         </div>
 
+        
+        <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+            <label for="theme1">Theme 1:</label>
+            <input type="text" id="theme1" name="theme1" placeholder="Theme 1">
+        </div>
+        <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+            <label for="theme2">Theme 2:</label>
+            <input type="text" id="theme2" name="theme2" placeholder="Theme 2">
+        </div>
+        <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+            <label for="theme3">Theme 3:</label>
+            <input type="text" id="theme3" name="theme3" placeholder="Theme 3">
+        </div>
+
+
         <button id="createEventButton" onclick="postEvent()">Create Event</button>
 
 
@@ -109,11 +138,17 @@
             var room3name = document.getElementById('room3name').value;
             var room3title = document.getElementById('room3title').value;
 
+            var theme1 = document.getElementById('theme1').value;
+            var theme2 = document.getElementById('theme2').value;
+            var theme3 = document.getElementById('theme3').value;
+            var themes = [theme1, theme2, theme3]
             var tabletags = tableTags.data
-            const mainRoomData = {name: name, title: title, data: {userCategories:tabletags}}
-            const room1Data = {name: room1name, title: room1title, data: {userCategories:tabletags}}
-            const room2Data = {name: room2name, title: room2title, data: {userCategories:tabletags}}
-            const room3Data = {name: room3name, title: room3title, data: {userCategories:tabletags}}
+            console.log('tabletags:', tabletags)
+            console.log('themes:', themes)
+            const mainRoomData = {name: name, title: title, data: {userCategories:tabletags, themes: themes}}
+            const room1Data = {name: room1name, title: room1title, data: {userCategories:tabletags, themes: themes}}
+            const room2Data = {name: room2name, title: room2title, data: {userCategories:tabletags, themes: themes}}
+            const room3Data = {name: room3name, title: room3title, data: {userCategories:tabletags, themes: themes}}
 
             const mainroom = await fetch('/aovi/rooms', {
                 method: 'POST',
@@ -145,7 +180,7 @@
 
 
             // got to main room
-            location.assign(`/aovi/evententry/${mainroom._id}`);
+            location.assign(`/aovi/views/events/${mainroom._id}/registration`);
 
         }
 

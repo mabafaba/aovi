@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Event</title>
+    <title data-translator-text="Event Overview">Event Overview</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
-    <script src="/aovi/navigation.js"></script>
+    <script src="/aovi/static/navigation.js"></script>
+    <script src="/aovi/static/languagepicker.js"></script>
     <!-- classless sakura -->
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
     <style>
@@ -33,13 +34,33 @@
         }
 
         #app {
-            position: relative;
             display: flex;
+            flex-wrap: wrap;
             height: 100vh;
-            width: 90%;
-            left:5%;
-            overflow: auto;
+            width: 100%;
+            padding: 0 5%;
+            box-sizing: border-box;
         }
+
+        .room {
+            border: 1px solid black;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 10px;
+            flex: 1 1 calc(33.333% - 20px);
+            
+            overflow-y: scroll;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 1000px) {
+            .room {
+                flex: 1 1 100%;
+                max-height:500px;
+            }
+            
+        }
+
 
 
         main-navigation {
@@ -73,6 +94,15 @@
             cursor: pointer;
         }
 
+        .smallLabel {
+            margin-left:3px;
+            display: inline-flex;
+        }
+
+
+        
+
+
     </style>
 </head>
 <body>
@@ -96,9 +126,15 @@ async function init() {
             console.error('Error fetching user data:', error);
         });
 
-        eventID = window.location.href.split('/event/').pop();
-        // strip trailing slash and hash
-        eventID = eventID.replace(/\/$/, '');
+        const url = window.location.href;
+        console.log('URL:', url);
+        // split on "/", 
+        const pathParts = url.split('/');
+        console.log('Path parts:', pathParts);
+        const eventIndex = pathParts.indexOf('events');
+        const eventID = pathParts[eventIndex + 1];
+        
+        
 
         console.log('Event ID:', eventID);
 
@@ -165,6 +201,67 @@ async function init() {
         }
          
 
+        const t = translator({
+            // most agreed etc.
+            'en': {
+                'Most Agreed': 'Most Agreed',
+                'Controversial': 'Controversial',
+                'Most Disagreed': 'Most Disagreed',
+                'Most Neutral': 'Most Neutral',
+                'Most Votes': 'Most Votes',
+                'Event Overview': 'Event Overview',
+                'agree': 'agree',
+                'disagree': 'disagree',
+                'neutral': 'neutral'
+            },
+            'de': {
+                'Most Agreed': 'Meiste Zustimmungen',
+                'Controversial': 'Kontrovers',
+                'Most Disagreed': 'Meiste Ablehnungen',
+                'Most Neutral': 'Meiste Neutral',
+                'Most Votes': 'Meiste Stimmen',
+                'Event Overview': 'Event Übersicht',
+                'agree': 'stimmen zu',
+                'disagree': 'stimmen nicht zu',
+                'neutral': 'neutral'
+
+            },
+            'pt': {
+                'Most Agreed': 'Mais Concordado',
+                'Controversial': 'Controverso',
+                'Most Disagreed': 'Mais Discordado',
+                'Most Neutral': 'Mais Neutro',
+                'Most Votes': 'Mais Votado',
+                'Event Overview': 'Visão Geral do Evento',
+                'agree': 'concordar',
+                'disagree': 'discordar',
+                'neutral': 'neutro'
+            },
+            'es': {
+                'Most Agreed': 'Más Acordado',
+                'Controversial': 'Controvertido',
+                'Most Disagreed': 'Más Discrepante',
+                'Most Neutral': 'Más Neutral',
+                'Most Votes': 'Más Votado',
+                'Event Overview': 'Resumen del Evento',
+                'agree': 'de acuerdo',
+                'disagree': 'en desacuerdo',
+                'neutral': 'neutral'
+            },
+            'fr': {
+                'Most Agreed': 'Le plus approuvé',
+                'Controversial': 'Controversé',
+                'Most Disagreed': 'Le plus désapprouvé',
+                'Most Neutral': 'Le plus neutre',
+                'Most Votes': 'Le plus voté',
+                'Event Overview': 'Aperçu de l\'événement',
+                'agree': 'sont d\'accord',
+                'disagree': 'ne sont pas d\'accord',
+                'neutral': 'neutre'
+
+            }
+        })
+
 
         
 
@@ -176,19 +273,10 @@ async function init() {
         const app = document.getElementById('app');
         rooms.forEach(room => {
             const roomDiv = document.createElement('div');
-            roomDiv.style.width = '33%';
-            roomDiv.style.height = '100%';
-            roomDiv.style.display = 'flex';
-            roomDiv.style.flexDirection = 'column';
-            roomDiv.style.border = '1px solid black';
-            roomDiv.style.padding = '10px';
-            roomDiv.style.margin = '10px';
-            roomDiv.style.borderRadius = '10px';
-            roomDiv.style.overflow = 'auto';
-            // inline
-            roomDiv.style.flex = '1';
+            roomDiv.classList.add('room');
 
-            const roomTitle = document.createElement('h2');
+
+            const roomTitle = document.createElement('h6');
             roomTitle.innerHTML = room.title;
             roomDiv.appendChild(roomTitle);
 
@@ -198,13 +286,19 @@ async function init() {
             
 
             const sortOptions = ['Most Agreed', 'Controversial', 'Most Disagreed', 'Most Neutral', 'Most Votes'];
-
+            // const sortLabels = sortOptions.map(option => t(option));
             sortOptions.forEach(option => {
                 const optionElement = document.createElement('option');
                 optionElement.value = option;
-                optionElement.innerHTML = option;
+                // optionElement.innerHTML = sortLabels[sortOptions.indexOf(option)];
+                // set data-translation-text attribute
+                optionElement.setAttribute('data-translator-text', option);
                 sortingInput.appendChild(optionElement);
             })
+            console.log('room!', room);
+            const userCategories = room.data.userCategories;
+            const themes = room.data.themes;
+            console.log('User categories:', userCategories);
 
             roomDiv.appendChild(sortingInput);
 
@@ -227,13 +321,8 @@ async function init() {
 
             // on input change
 
-            sortingInput.addEventListener('change', (event) => {
-                const sortedComments = sortComments(room.comments, event.target.value);
-                roomDiv.innerHTML = '';
-                roomDiv.appendChild(roomTitle);
-                roomDiv.appendChild(sortingInput);
-                sortedComments.forEach(comment => {
-                    const commentDiv = document.createElement('div');
+            const commentAsHtmlDiv = function(comment){
+                const commentDiv = document.createElement('div');
                     commentDiv.style.border = '1px solid black';
                     commentDiv.style.padding = '10px';
                     commentDiv.style.margin = '10px';
@@ -248,18 +337,58 @@ async function init() {
 
 
                     const agreeDiv = document.createElement('div');
-                    agreeDiv.innerHTML = `Agrees: ${comment.usersAgree}`;
-                    votesDiv.appendChild(agreeDiv);
+                    agreeDiv.style.display = 'inline-flex';
+                    const agreeLabel = document.createElement('div');
+                    const agreeNumber = document.createElement('div');
+                    
+                    agreeLabel.classList.add('smallLabel');
+                    agreeLabel.setAttribute('data-translator-text', 'agree');
+                    agreeNumber.innerHTML = ' ' + comment.usersAgree;
+                    agreeNumber.classList.add('smallLabel');
+                    agreeDiv.appendChild(agreeLabel);
+                    agreeDiv.appendChild(agreeNumber);
 
                     const disagreeDiv = document.createElement('div');
-                    disagreeDiv.innerHTML = `Disagrees: ${comment.usersDisagree}`;
-                    votesDiv.appendChild(disagreeDiv);
+                    disagreeDiv.style.display = 'inline-flex';
+                    const disagreeLabel = document.createElement('div');
+                    const disagreeNumber = document.createElement('div');
+                    disagreeLabel.classList.add('smallLabel');
+                    disagreeLabel.setAttribute('data-translator-text', 'disagree');
+                    disagreeNumber.innerHTML = ' ' + comment.usersDisagree;
+                    disagreeNumber.classList.add('smallLabel');
+                    
+                    disagreeDiv.appendChild(disagreeLabel);
+                    disagreeDiv.appendChild(disagreeNumber);
 
                     const neutralDiv = document.createElement('div');
-                    neutralDiv.innerHTML = `Neutral: ${comment.usersNeutral}`;
+                    neutralDiv.style.display = 'inline-flex';
+                    const neutralLabel = document.createElement('div');
+                    const neutralNumber = document.createElement('div');
+                    neutralLabel.classList.add('smallLabel');
+                    neutralLabel.setAttribute('data-translator-text', 'neutral');
+                    neutralNumber.innerHTML = ' ' + comment.usersNeutral;
+                    neutralNumber.classList.add('smallLabel');
+                    neutralDiv.appendChild(neutralLabel);
+                    neutralDiv.appendChild(neutralNumber);
+
+                    votesDiv.appendChild(agreeDiv);
+                    votesDiv.appendChild(disagreeDiv);
                     votesDiv.appendChild(neutralDiv);
 
+
                     commentDiv.appendChild(votesDiv);
+                    return commentDiv;
+            }
+
+        
+
+            sortingInput.addEventListener('change', (event) => {
+                const sortedComments = sortComments(room.comments, event.target.value);
+                roomDiv.innerHTML = '';
+                roomDiv.appendChild(roomTitle);
+                roomDiv.appendChild(sortingInput);
+                sortedComments.forEach(comment => {
+                    const commentDiv = commentAsHtmlDiv(comment);
                     roomDiv.appendChild(commentDiv);
                 });
             });
@@ -269,6 +398,7 @@ async function init() {
             // set input to most agreed
             sortingInput.value = 'Most Agreed';
             sortingInput.dispatchEvent(new Event('change'));
+
 
 
 
@@ -282,6 +412,7 @@ async function init() {
     }
 
     init();
+
     
     </script>
 </body>

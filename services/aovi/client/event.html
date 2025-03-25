@@ -7,64 +7,23 @@
     <title>Event</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
-    <script src="/aovi/navigation.js"></script>
+    <script src="/aovi/static/navigation.js"></script>
+    <script src="/aovi/static/languagepicker.js"></script>
     <!-- classless sakura -->
-    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
+    <link rel="stylesheet" href="/aovi/static/style.css">
     <style>
+        .enterRoomButton {
+            position: relative;
+            right: 0 !important;
 
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
+            margin:0px;
+            margin-top:15px;
+
+             
         }
 
         #app {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-
-        main-navigation {
-            position: relative;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            height: 10%;
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            border-radius:10px;
-        }
-
-        .enterRoomButton {
-            background-color: #9b00b0;
-            color: white;
-            padding: 10px;
-            margin: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border: none;
-            
-        }
-
-        .enterRoomButton:hover {
-            background-color: #740084b7;
-            color: white;
-            padding: 10px;
-            margin: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
-            transform: translateY(10px) !important;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom:40px;
+            overflow-y: scroll;
         }
 
     </style>
@@ -78,6 +37,29 @@
  
      <!-- <svg width="960" height="600"></svg> -->
     <script>
+
+        const t = translator({
+            'en': {
+                'Select Chapter': 'Select Chapter',
+                'ENTER': 'ENTER'
+            },
+            'pt': {
+                'Select Chapter': 'Selecionar Capítulo',
+                'ENTER': 'ENTRAR'
+            },
+            'es': {
+                'Select Chapter': 'Seleccionar Capítulo',
+                'ENTER': 'ENTRAR'
+            },
+            'fr': {
+                'Select Chapter': 'Sélectionner un chapitre',
+                'ENTER': 'ENTRER'
+            },
+            'de': {
+                'Select Chapter': 'Kapitel auswählen',
+                'ENTER': 'EINTRETEN'
+            }
+        })
 
         const me = fetch('/aovi/user/me', {
             method: 'GET',
@@ -94,19 +76,24 @@
         });
 
 
-        // get event id from last url part ..../evet/{event}/...
-        const eventIdRaw = location.pathname.split('event/id/').pop();
-        // strip all non alphanumeric characters
-        const eventId = eventIdRaw.replace(/[^a-zA-Z0-9]/g, '');
+        var eventId = location.pathname.split('/events/').pop().split('/')[0];
         console.log('Event id:', eventId);
+        // remove non-alphanumeric characters
+        eventId = eventId.replace(/[^a-zA-Z0-9]/g, '');
+
+        console.log('Event id enventhtml:', eventId);
 
 
-        // insert <main-navigation back-url=....></main-navigation>
+
         
-        const mainNavigation = `<main-navigation back-url="/aovi/eventregistration/id/${eventId}"></main-navigation>`;
-        document.getElementById('app').innerHTML += mainNavigation;
+        const mainNavigation = `<main-navigation back-url="/aovi/views/events/${eventId}/registration"></main-navigation>`;
+        // prepend to body
+        // document.getElementById('app').innerHTML += mainNavigation;
+        // not as above, prepend!
+        const body = document.getElementsByTagName('body')[0];
+        body.innerHTML = mainNavigation + body.innerHTML;
 
-        const titleHtml = `<h1>Select Chapter</h1>`
+        const titleHtml = `<h1 data-translator-text="Select Chapter">${t('Select Chapter')}</h1>`;
         document.getElementById('app').innerHTML += titleHtml;
 
         // fetch event data
@@ -137,12 +124,14 @@
                 
                 // create an enter button for the room
                 const enterButton = document.createElement('button');
-                enterButton.className = 'enterRoomButton';
-                enterButton.innerHTML = 'ENTER';
+                enterButton.classList.add('bigButton');
+                enterButton.classList.add('enterRoomButton');
+                enterButton.setAttribute('data-translator-text', 'ENTER');
+
                 const roomid = data.containsRooms[room]._id;
                 
                 enterButton.addEventListener('click', () => {
-                    location.assign(`/aovi/event/${data._id}/room/${roomid}`);
+                    location.assign(`/aovi/views/events/${data._id}/room/${roomid}`);
                 });
                 
                 // append the label and button to the container
@@ -151,12 +140,15 @@
                 
                 // append the container to the app
                 document.getElementById('app').appendChild(roomContainer);
-
+                setLanguage();
             }
+            
         })
         .catch((error) => {
             console.error('Error fetching event data:', error);
         });
+
+        
     
     </script>
 </body>

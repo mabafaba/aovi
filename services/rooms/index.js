@@ -26,6 +26,7 @@ publicRoomData = function(room, recipientUserId){
         title: room.title,
         containsRooms: room.containsRooms,
         userIsCreator: room.createdBy.toString() === recipientUserId.toString(),
+        data: room.data || {}
     }
     return publicRoom;
 }
@@ -37,6 +38,8 @@ router.use('/static', express.static('./services/rooms/client'));
 router.use(express.json());
 
 // Delete all rooms
+// log in red to console
+console.log('\x1b[31m%s\x1b[0m', 'WARNING: ROUTE TO DELETE ROOMS OPEN');
 router.get('/wipe', async (req, res) => {
     try {
         await Room.deleteMany();
@@ -63,6 +66,7 @@ router.post('/', async (req, res) => {
     req.body.title = sanitizeHtml(req.body.title.toString(), sanitizeOptions);
     }
 
+    console.log('creating room', req.body);
     
     
     
@@ -167,10 +171,9 @@ router.post('/', async (req, res) => {
             // res.status(500).send(error);
         // }
     });
-    
-    
+        
     
     
     // Export the service
-    module.exports = router;
+    module.exports = {router, Room};
     

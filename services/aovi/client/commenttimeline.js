@@ -21,7 +21,7 @@ class TimelineComponent extends HTMLElement {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #f0f0f0;
+            background:rgb(211, 211, 211);
         }
         .timeline {
             position: absolute;

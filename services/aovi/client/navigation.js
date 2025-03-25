@@ -78,19 +78,30 @@ class MainNavigation extends HTMLElement {
         this.shadowRoot.innerHTML = `
             <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
+            <script src="/aovi/static/languagepicker.js"></script>
             <style>
                 nav {
                     position: relative;
-                    padding: 10px;
-                    padding-top:20px;
+                    padding: 15px;
+                    padding-top: 20px;
                     top: 0;
                     left: 0;
                     display: flex;
                     overflow: hidden;
                     width: 100%;
                     z-index: 2;
+                    box-sizing: border-box;
+                    height: 100%;
                     
+                }
+
+                /* all children and children children erc. */
+                nav * {
+                    box-sizing: border-box;
+                }
+
+                nav {
+                    align-items: center;
                 }
 
                 img {
@@ -109,6 +120,7 @@ class MainNavigation extends HTMLElement {
                     top: 0;
                     left: 50%;
                     transform: translateX(-50%);
+                    margin-bottom: 0;
                 }
 
                 .hidden {
@@ -161,6 +173,12 @@ class MainNavigation extends HTMLElement {
                     cursor: pointer;
                 }
 
+                language-picker {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                }
+
 
                 /* shadow below nav */
 
@@ -184,7 +202,9 @@ class MainNavigation extends HTMLElement {
                 </table>
             </div>
 
-            <img src="/aovi/logo.png" id="logo">
+            <img src="/aovi/static/logo.png" id="logo">
+
+            <language-picker languages="pt,en,fr,de"></language-picker>
                 
             </nav>
         `;

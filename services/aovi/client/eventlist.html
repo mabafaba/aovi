@@ -11,27 +11,38 @@
     <!-- fontawesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-    <script src="/aovi/navigation.js"></script>
-    <script src="/aovi/commentTimeline.js"></script>
+    <script src="/aovi/static/navigation.js"></script>
+    <script src="/aovi/static/commenttimeline.js"></script>
+    <script src="/aovi/static/languagepicker.js"></script>
     <!-- classless sakura -->
-    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
-
+    <link rel="stylesheet" href="/aovi/static/style.css">
 
     <style>
 
-        body html {
-            position: relative;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
+        
 
         #app {
-            position: relative;
+            /* position: relative;
             display: flex;
             flex-direction: column;
             height: 100vh;
-            width: 100vw;
+            width: 80%;*/
+            margin:auto; 
+            overflow-y: scroll;
+
+        }
+
+        
+        #app div {
+            width: 90%;
+            margin: auto;
+            padding: 15px;
+
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            margin-top: 20px;
         }
     
         comments-timeline {
@@ -50,19 +61,12 @@
 
         /* make a look like buttons */
         a {
-            /* background-color: #c893cf;
-            color: white;
-            text-decoration: none;
-            padding: 10px;
-            margin: 10px;
-            border-radius: 10px;
+           
             cursor: pointer;
-            margin: 30px; */
         }
         
         .event {
-            background-color: #FFFFFF;
-            color: rgb(95, 8, 105);
+         
             padding: 10px;
             margin: 10px;
             border-radius: 10px;
@@ -71,21 +75,75 @@
 
         }
 
+        .event * {}
+
         tr {
             margin: 20px;
             padding: 50px;
         }
 
+        img {
+            float:left;
+            width:20%;
+        }
 
+        table  {
+            width:50%;
+            float:right;
+        }
+
+        main-navigation {
+            margin-bottom: 20px;
+        }
+
+        .link {
+            background-color: none;;
+            /* color: rgb(0, 0, 2);
+            text-decoration: none;
+            cursor: pointer;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 10px; */
+        }
     </style>
 </head>
 <body>
+    <main-navigation></main-navigation>
     <div id="app">
         
     
     </div>
     <!-- <svg width="960" height="600"></svg> -->
     <script>
+
+
+const t = translator({
+    'en': {
+        'register': 'Register',
+        'overview': 'Go to Overview',
+        'timeline': 'Go to Timeline'
+    },
+    'pt': {
+        'register': 'Registrar',
+        'overview': 'Ir para Visão Geral',
+        'timeline': 'Ir para Linha do Tempo'
+    },
+    'es': {
+        'register': 'Registrarse',
+        'overview': 'Ir a la Visión General',
+        'timeline': 'Ir a la Línea de Tiempo'
+    },
+    'fr': {
+        'register': 'S\'inscrire',
+        'overview': 'Aller à l\'Aperçu',
+        'timeline': 'Aller à la Chronologie'
+    },
+    'de': {
+        'register': 'Registrieren',
+        'overview': 'Zur Übersicht',
+        'timeline': 'Zum Zeitstrahl'
+    }
+});
 
 async function getEvents (){
         const me = fetch('/aovi/user/me', {
@@ -138,19 +196,16 @@ async function getEvents (){
         events.forEach(event => {
             const eventDiv = document.createElement('div');
             eventDiv.className = 'event';
-            app.appendChild(eventDiv);
-            // append name as h2
+            app.prepend(eventDiv);
+            // append name as h2a
             const eventName = document.createElement('h2');
             eventName.textContent = event.name;
             eventDiv.appendChild(eventName);
             
-
-
-            // fetch image from /aovi/eventqr/:eventID
             const qrImage = document.createElement('img');
-            qrImage.src = `/aovi/eventqr/${event._id}`;
+            qrImage.src = `/aovi/events/${event._id}/qr`;
             // 100% width
-            qrImage.style.width = '400px';
+            qrImage.style.width = '100px';
 
             eventDiv.appendChild(qrImage);
 
@@ -159,47 +214,38 @@ async function getEvents (){
             eventDiv.appendChild(table);
 
             const registrationRow = document.createElement('tr');
-            const registrationLabelCell = document.createElement('td');
-            registrationLabelCell.textContent = '';
-            const registrationButtonCell = document.createElement('td');
+            const registrationCell = document.createElement('td');
             const registrationLink = document.createElement('a');
-            registrationLink.textContent = 'Register';
-            registrationLink.className = 'registrationLink';
-            registrationLink.href = `/aovi/eventregistration/id/${event._id}`;
-            registrationButtonCell.appendChild(registrationLink);
-            registrationRow.appendChild(registrationLabelCell);
-            registrationRow.appendChild(registrationButtonCell);
+            registrationLink.setAttribute('data-translator-text', 'register');
+            registrationLink.className = 'link';
+            registrationLink.href = `/aovi/views/events/${event._id}/registration`;
+            registrationLink.textContent = t('register');
+            registrationCell.appendChild(registrationLink);
+            registrationRow.appendChild(registrationCell);
             table.appendChild(registrationRow);
 
-
             const overviewRow = document.createElement('tr');
-            const overviewLabelCell = document.createElement('td');
-            overviewLabelCell.textContent = '';
-            const overviewButtonCell = document.createElement('td');
+            const overviewCell = document.createElement('td');
             const overviewLink = document.createElement('a');
-            overviewLink.textContent = 'Go to Overview';
-            overviewLink.className = 'overviewLink';
-            overviewLink.href = `/aovi/overview/event/${event._id}`;
-            overviewButtonCell.appendChild(overviewLink);
-            overviewRow.appendChild(overviewLabelCell);
-            overviewRow.appendChild(overviewButtonCell);
+            overviewLink.setAttribute('data-translator-text', 'overview');
+            overviewLink.className = 'link';
+            overviewLink.href = `/aovi/views/events/${event._id}/overview`;
+            overviewLink.textContent = t('overview');
+            overviewCell.appendChild(overviewLink);
+            overviewRow.appendChild(overviewCell);
             table.appendChild(overviewRow);
-
             const timelineRow = document.createElement('tr');
-            const timelineLabelCell = document.createElement('td');
-            timelineLabelCell.textContent = '';
-            const timelineButtonCell = document.createElement('td');
+            const timelineCell = document.createElement('td');
             const timelineLink = document.createElement('a');
-            timelineLink.textContent = 'Go to Timeline';
-            timelineLink.className = 'timelineLink';
-            timelineLink.href = `/aovi/timeline/event/${event._id}`;
-            timelineButtonCell.appendChild(timelineLink);
-            timelineRow.appendChild(timelineLabelCell);
-            timelineRow.appendChild(timelineButtonCell);
+            timelineLink.setAttribute('data-translator-text', 'timeline');
+            timelineLink.className = 'link';
+            timelineLink.href = `/aovi/views/events/${event._id}/timeline`;
+            timelineLink.textContent = t('timeline');
+            timelineCell.appendChild(timelineLink);
+            timelineRow.appendChild(timelineCell);
             table.appendChild(timelineRow);
         });
     });
-
   
     </script>
 </body>

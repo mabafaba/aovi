@@ -11,11 +11,11 @@
     <!-- fontawesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-    <script src="/aovi/navigation.js"></script>
-    <script src="/aovi/commentTimeline.js"></script>
+    <script src="/aovi/static/navigation.js"></script>
+    <script src="/aovi/static/commenttimeline.js"></script>
     <!-- classless sakura -->
-    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
-
+    <!-- <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css"> -->
+    <link rel="stylesheet" href="aovi/static/style.css">
 
     <style>
 
@@ -34,31 +34,7 @@
             width: 100vw;
         }
     
-        comments-timeline {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            width: 100%;
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            border-radius:10px;
-        }
-
-        /* make a look like buttons */
-        a {
-            /* background-color: #c893cf;
-            color: white;
-            text-decoration: none;
-            padding: 10px;
-            margin: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            margin: 30px; */
-        }
+    
         
         .event {
             background-color: #FFFFFF;
@@ -154,9 +130,8 @@ async function getEvents (){
             
 
 
-            // fetch image from /aovi/eventqr/:eventID
             const qrImage = document.createElement('img');
-            qrImage.src = `/aovi/eventqr/${event._id}`;
+            qrImage.src = `/aovi/events/${event._id}/qr`;
             // 100% width
             qrImage.style.width = '400px';
 
@@ -173,7 +148,7 @@ async function getEvents (){
             const registrationLink = document.createElement('a');
             registrationLink.textContent = 'Register';
             registrationLink.className = 'registrationLink';
-            registrationLink.href = `/aovi/eventregistration/id/${event._id}`;
+            registrationLink.href = `/aovi/views/events/${event._id}/registration`;
             registrationButtonCell.appendChild(registrationLink);
             registrationRow.appendChild(registrationLabelCell);
             registrationRow.appendChild(registrationButtonCell);
@@ -187,7 +162,7 @@ async function getEvents (){
             const overviewLink = document.createElement('a');
             overviewLink.textContent = 'Go to Overview';
             overviewLink.className = 'overviewLink';
-            overviewLink.href = `/aovi/overview/event/${event._id}`;
+            overviewLink.href = `/aovi/views/events/${event._id}/overview`;
             overviewButtonCell.appendChild(overviewLink);
             overviewRow.appendChild(overviewLabelCell);
             overviewRow.appendChild(overviewButtonCell);
@@ -200,14 +175,17 @@ async function getEvents (){
             const timelineLink = document.createElement('a');
             timelineLink.textContent = 'Go to Timeline';
             timelineLink.className = 'timelineLink';
-            timelineLink.href = `/aovi/timeline/event/${event._id}`;
+            timelineLink.href = `/aovi/views/events/${event._id}/timeline`;
             timelineButtonCell.appendChild(timelineLink);
             timelineRow.appendChild(timelineLabelCell);
             timelineRow.appendChild(timelineButtonCell);
             table.appendChild(timelineRow);
+            setLanguage();
         });
+        
     });
 
+    setLanguage()
   
     </script>
 </body>
