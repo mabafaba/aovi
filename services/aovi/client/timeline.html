@@ -218,8 +218,8 @@ async function init (){
         const commentDiv = document.createElement("div");
         commentDiv.innerHTML = comment.text;
         commentDiv.id = comment._id;
-        commentDiv.style.fontSize = "12px";
-        commentDiv.style.fontWeight = "normal";
+        commentDiv.style.fontSize = "15px";
+        commentDiv.style.fontWeight = "bold";
         //max width of 200px
         commentDiv.style.width = "200px";
         commentDiv.style.wordWrap = "break-word";
@@ -303,17 +303,13 @@ async function init (){
 
         const table = document.createElement('table');
         document.getElementById('app').appendChild(table);
-        themes.forEach(theme => {
+        themes.forEach(async theme => {
             const themeComments = comments.filter(comment => comment.data.commentTheme == theme);
             console.log('Theme:', theme);
             console.log('Comments:', themeComments);
 
         const commentTimeline = document.createElement('comments-timeline');
         commentTimeline.id = theme;
-        themeComments.map(comment => {
-            const createdAtTimestamp = new Date(comment.createdAt).getTime();
-            commentTimeline.addEvent(createdAtTimestamp, commentAsEventDiv(comment).outerHTML);
-        });
 
         themeLabel = document.createElement('h5');
         themeLabel.textContent = theme;
@@ -332,6 +328,11 @@ async function init (){
         // append to app
         document.getElementById('app').appendChild(table);
 
+        for (const comment of themeComments) {
+            const createdAtTimestamp = new Date(comment.createdAt).getTime();
+            commentTimeline.addEvent(createdAtTimestamp, commentAsEventDiv(comment).outerHTML);
+            await new Promise(resolve => setTimeout(resolve, 0)); // Wait one tick
+        }
     
 
         });

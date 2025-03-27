@@ -373,6 +373,7 @@ class CommentsAsChat extends HTMLElement {
                 display: flex;
                 flex-direction: column;
                 align-items: flex-end;
+                word-wrap: break-word;
                 
             }
             #comments-container {
@@ -450,6 +451,12 @@ class CommentsAsChat extends HTMLElement {
             .button-text {
                 font-size: 8px;
                 display:inline;
+            }
+
+            .commentBubble{
+            width: 100%;
+            /* break words */
+            word-wrap: break-word;
             }
             
             </style>

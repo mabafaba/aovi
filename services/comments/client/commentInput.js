@@ -121,11 +121,26 @@ class CommentInput extends HTMLElement {
             margin-bottom: 10px;
         }
 
+        @media screen and (max-height: 570px) {
+            .comment-box textarea {
+                height: 1em !important;
+            }
+
+            .sendMessageButton {
+                height: 25px !important;
+            }
+
+            .comment-box .radio-group {
+                font-size:0.4em !important;
+            }
+        }
+
+
         .comment-box .radio-group {
             display: table;
             width: 100%;
             margin-bottom: 10px;
-            font-size: 0.8em;
+            font-size: 0.6em;
             color: #666;
         }
         .comment-box .radio-group div {
