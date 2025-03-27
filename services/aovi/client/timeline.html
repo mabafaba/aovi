@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -229,6 +229,8 @@ async function init (){
         commentDiv.style.maxHeight = "50px";
         commentDiv.style.overflowY = "auto";
         commentDiv.style.display = "block";
+        // hide scroll bars
+        commentDiv.style.scrollbarWidth = "none";
 
         // more agree than disagree?
         if(comment.usersAgree > comment.usersDisagree){
