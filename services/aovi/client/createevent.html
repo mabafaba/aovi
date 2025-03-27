@@ -43,6 +43,12 @@
 
         input {
             margin-bottom:30px;
+            padding: 5px;
+        
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        background-color: #fff;
+
         }
 
 
@@ -52,10 +58,21 @@
             font-weight: bold;
         }
 
+        #app {
+            margin-bottom: 150px;
+            height: calc(100vh - 80px);
+        }
+
+
+
         
     </style>
 </head>
 <body>
+    <main-navigation
+    menu-item-labels='["All Events","New Event", "Logout"]'
+    menu-item-urls='["/aovi/views/events","/aovi/views/events/create","/aovi/user/logout"]'
+></main-navigation>
     <div id="app">
         <h1>Create Event</h1>
 
@@ -66,6 +83,11 @@
         <!-- title input -->
         <label for="title">Title:</label>
         <input type="text" id="title" name="title" placeholder="Title">
+
+        <!-- admin boundaries dropdown -->
+        <label for="adminBoundariesDropdown">Geographic Area:</label>
+        <select id="adminBoundariesDropdown"></select>
+
 
         <label for="tabletags">Participant Categories:</label>
         <div id="tabletagsContainer"></div>
@@ -104,9 +126,11 @@
         </div>
 
 
+
+
         <button id="createEventButton" onclick="postEvent()">Create Event</button>
 
-
+        <div style="height: 200px;">&nbsp;</div>
     
     </div>
     <!-- <svg width="960" height="600"></svg> -->
@@ -128,6 +152,29 @@
         });
 
 
+
+
+
+        const adminBoundaries = fetch('/aovi/geodata', {
+            method: 'GET',
+            headers: {
+            'Content-Type': 'application/json'
+            }
+        }).then(response => response.json())
+        .then(data => {
+            const adminBoundariesDropdown = document.getElementById('adminBoundariesDropdown');
+            for (const boundary of data) {
+                const option = document.createElement('option');
+                option.value = boundary.properties.shapeISO;
+                option.textContent = `${boundary.properties.shapeISO} - ${boundary.properties.shapeName}`;
+                adminBoundariesDropdown.appendChild(option);
+            }
+
+            
+            
+        })
+
+
         postEvent = async function(){
             var name = document.getElementById('name').value;
             var title = document.getElementById('title').value;
@@ -143,13 +190,15 @@
             var theme3 = document.getElementById('theme3').value;
             var themes = [theme1, theme2, theme3]
             var tabletags = tableTags.data
-            console.log('tabletags:', tabletags)
-            console.log('themes:', themes)
-            const mainRoomData = {name: name, title: title, data: {userCategories:tabletags, themes: themes}}
-            const room1Data = {name: room1name, title: room1title, data: {userCategories:tabletags, themes: themes}}
-            const room2Data = {name: room2name, title: room2title, data: {userCategories:tabletags, themes: themes}}
-            const room3Data = {name: room3name, title: room3title, data: {userCategories:tabletags, themes: themes}}
 
+            const adminBoundary = document.getElementById('adminBoundariesDropdown').value;
+
+            const mainRoomData = {name: name, title: title, data: {userCategories:tabletags, themes: themes, adminBoundary: adminBoundary}}
+            const room1Data = {name: room1name, title: room1title, data: {userCategories:tabletags, themes: themes, adminBoundary: adminBoundary}}
+            const room2Data = {name: room2name, title: room2title, data: {userCategories:tabletags, themes: themes, adminBoundary: adminBoundary}}
+            const room3Data = {name: room3name, title: room3title, data: {userCategories:tabletags, themes: themes, adminBoundary: adminBoundary}}
+            console.log('using data', mainRoomData);
+            
             const mainroom = await fetch('/aovi/rooms', {
                 method: 'POST',
                 body: JSON.stringify(mainRoomData),

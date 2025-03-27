@@ -130,7 +130,7 @@ class CommentsAsChat extends HTMLElement {
                 this.shadowRoot.getElementById('comments-container').appendChild(commentHTML);
             }
 
-            this.scrollToBottom();
+            // this.scrollToBottom();
             
             this.shadowRoot.querySelectorAll('.reaction-buttons button').forEach(button => {
                 button.addEventListener('click', (event) => {
@@ -144,15 +144,23 @@ class CommentsAsChat extends HTMLElement {
             console.error(error);
         }
         this.listenForNewComments();
+        this.listenForUpdatedComments();
         this.observeCommentContainer();
         // trigger translation
         document.documentElement.lang = document.documentElement.lang;
+
+
+        // if document event "<comment-input>: posted successfully", scroll to bottom
+        document.addEventListener('<comment-input>: posted successfully', () => {
+            console.log("I MADE A COMMENT SCROLLING DOWN");
+            this.scrollToBottom();
+        });
     }
 
     observeCommentContainer() {
         const commentsContainer = this.shadowRoot.getElementById('comments-container');
         const observer = new MutationObserver(() => {
-            this.scrollToBottom();
+            // this.scrollToBottom();
         });
         observer.observe(commentsContainer, { childList: true });
     }
@@ -166,12 +174,15 @@ class CommentsAsChat extends HTMLElement {
     }
 
     generateCommentHTML(comment) {
+        console.log("comment",comment);
         const htmlstring = `
             <div class='commentBubble'>
             <div class='time'>${new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                 <p class="commentmaintext">${comment.text}</p>
                 <div class="reaction-buttons">
-                <button id="disagree-button" data-translator-text="Disagree"></button><button id="neutral-button" data-translator-text="Neutral"></button><button id="agree-button" data-translator-text="Agree"></button>
+                <button id="disagree-button"><div class="button-counter"></div><div class="button-text" data-translator-text="Disagree"></div></button>
+                <button id="neutral-button"><div class="button-counter"></div><div class="button-text" data-translator-text="Neutral"></div></button>
+                <button id="agree-button" ><div class="button-counter"></div><div class="button-text" data-translator-text="Agree"></div></button>
                 </div>
             </div>
                 `;
@@ -183,6 +194,11 @@ class CommentsAsChat extends HTMLElement {
         htmlElement.querySelector('#agree-button').addEventListener('click', () => this.postReaction(comment, 'agree'));
         htmlElement.querySelector('#neutral-button').addEventListener('click', () => this.postReaction(comment, 'neutral'));
         htmlElement.querySelector('#disagree-button').addEventListener('click', () => this.postReaction(comment, 'disagree'));
+
+        // set counter values
+        htmlElement.querySelector('#agree-button .button-counter').innerText = comment.usersAgree;
+        htmlElement.querySelector('#neutral-button .button-counter').innerText = comment.usersNeutral;
+        htmlElement.querySelector('#disagree-button .button-counter').innerText = comment.usersDisagree;
 
         // comment.myReaction sets the button style
         const reactionButtons = htmlElement.querySelectorAll('.reaction-buttons button');
@@ -208,6 +224,15 @@ class CommentsAsChat extends HTMLElement {
         console.log('posting reaction', reaction);
         console.log('to comment', comment);
         const commentElement = this.shadowRoot.getElementById(comment._id);
+
+        // scroll to next comment
+        const nextComment = commentElement.nextElementSibling;
+        if (nextComment) {
+            nextComment.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+
+
         const reactionButtons = commentElement.querySelectorAll('.reaction-buttons button');
         reactionButtons.forEach(button => button.classList.add('passive-button'));
         const buttonId = reaction === 'agree' ? 'agree-button' : reaction === 'neutral' ? 'neutral-button' : 'disagree-button';
@@ -217,6 +242,7 @@ class CommentsAsChat extends HTMLElement {
             return;
         }   
         try {
+            
             const response = await fetch(`/aovi/comments/reaction/${comment._id}`, {
                 method: 'POST',
                 headers: {
@@ -231,11 +257,7 @@ class CommentsAsChat extends HTMLElement {
             });
             if (response.ok) {
                 console.log('Reaction posted');
-                // scroll to next comment
-                const nextComment = commentElement.nextElementSibling;
-                if (nextComment) {
-                    nextComment.scrollIntoView({ behavior: 'smooth' });
-                }
+                
 
             } else {
                 console.error('Failed to post reaction');
@@ -247,17 +269,38 @@ class CommentsAsChat extends HTMLElement {
 
     listenForNewComments() {
         console.log("creating socket connection")
-        const socket = io( { path: '/aovi-socket-io' });
+        if(!this.socket) {
+            this.socket = io( { path: '/aovi-socket-io' });  
+        } 
 
         // join room
-        socket.emit('join', this.room);
+        this.socket.emit('join', this.room);
 
-        socket.on('comment created', (comment) => {
+        this.socket.on('comment created', (comment) => {
             console.log('New comment:', comment);
             this.addComment(comment);
-            this.scrollToBottom();
+            // this.scrollToBottom();
         });
         
+    }
+
+    listenForUpdatedComments() {
+        if(!this.socket) {
+            this.socket = io( { path: '/aovi-socket-io' });  
+        } 
+        this.socket.on('comment reacted', (comment) => {
+            const commentElement = this.shadowRoot.getElementById(comment._id);
+            if (commentElement) {
+                // for each button, update the counter
+                
+                const agreeCounter = commentElement.querySelector('#agree-button .button-counter');
+                const neutralCounter = commentElement.querySelector('#neutral-button .button-counter');
+                const disagreeCounter = commentElement.querySelector('#disagree-button .button-counter');
+                agreeCounter.innerText = comment.usersAgree;
+                neutralCounter.innerText = comment.usersNeutral;
+                disagreeCounter.innerText = comment.usersDisagree;
+            }
+        });
     }
 
     async fetchComments() {
@@ -316,20 +359,21 @@ class CommentsAsChat extends HTMLElement {
             }
 
             .comment {
-                color:white;
+                color:black;
                 float:right;
                 position: relative;
-                background-color: rgba(31, 31, 31, 0.76);
-                width: 80%;
+                background-color: rgba(208, 208, 208, 0.76);
+                width: 70%;
                 padding: 20px;
                 border-radius: 40px;
                 border-bottom-right-radius: 0;
                 margin-bottom: 10%;
                 margin-height:10%;
-                height: 80%;
+                min-height: 50px;
                 display: flex;
                 flex-direction: column;
                 align-items: flex-end;
+                
             }
             #comments-container {
                 width: 100%;
@@ -392,9 +436,20 @@ class CommentsAsChat extends HTMLElement {
             }
 
             .commentmaintext {
-                font-size:16px;
+                font-size:12px;
                 padding:20px;
                 text-align:right;
+            }
+
+            .button-counter {
+                font-size: 8px;
+                padding-right:3px;
+                display:inline;
+            }
+
+            .button-text {
+                font-size: 8px;
+                display:inline;
             }
             
             </style>

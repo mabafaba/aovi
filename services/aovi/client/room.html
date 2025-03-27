@@ -41,8 +41,11 @@
             height: 15%;
             padding-bottom:5%;
             width:100%;
+            position: relative;
+            align-items: center;
+            justify-content: center;
         }
-       
+
 
         text {
             font-family: sans-serif;
@@ -77,14 +80,7 @@
             
         }
         
-        comment-input {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
+ 
 
 
 
@@ -145,7 +141,7 @@
     .then(response => response.json())
     .catch((error) => {
         console.error('Error fetching room data:', error);
-    });
+});
 
     console.log('Room data:', roomData);
 

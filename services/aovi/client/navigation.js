@@ -6,13 +6,15 @@ class MainNavigation extends HTMLElement {
 
     connectedCallback() {
         this.render();
+
+
         this.shadowRoot.getElementById('menubutton').addEventListener('click', () => {
             const menu =  this.shadowRoot.getElementById('menu');
             this.shadowRoot.getElementById('menu').classList.toggle('hidden');
         });
 
         // if back-url attribute is set, show back button & add event listener
-        
+
         // fetching back0-url
         console.log('back url:', this.getAttribute('back-url'));
         if (this.getAttribute('back-url')) {
@@ -24,27 +26,51 @@ class MainNavigation extends HTMLElement {
         }
 
         // if menu-item-1-label & menu-item-1-url attributes are set, add menu item (for however many are set)
-        const setMenuItems = (i) => {
-            const menuItemLabel = this.getAttribute(`menu-item-${i}-label`);
-            const menuItemUrl = this.getAttribute(`menu-item-${i}-url`);
-            if (menuItemLabel && menuItemUrl) {
-                const menu = this.shadowRoot.getElementById('menu');
-                const table = menu.querySelector('table');
-                const row = table.insertRow();
-                const cell = row.insertCell();
-                cell.textContent = menuItemLabel;
-                cell.addEventListener('click', () => {
-                    window.location.href = menuItemUrl;
-                });
-                setMenuItems(i + 1);
+        const setMenuItems = () => {
+            console.log("setting menu items");
+            // get menu labels from attributes (stored as json array string)
+            let menuLabels = this.getAttribute('menu-item-labels')
+            console.log(menuLabels);    
+            if(menuLabels) {
+                menuLabels = JSON.parse(menuLabels);
+    
             }
+            console.log('menu labels', menuLabels);
+            const menuUrls = JSON.parse(this.getAttribute('menu-item-urls'));
+            const menu = this.shadowRoot.getElementById('menu');
+            const table = menu.querySelector('table');
+            console.log('table', table);
+            // clear existing menu items
+            table.innerHTML = '';
+            // create new menu items unless null
+            // log wether menu labels are null
+
+            if(menuLabels === null){
+                // hide menu button
+                this.shadowRoot.getElementById('menubutton').classList.add('hidden');
+                return;
+            }
+            menuLabels.forEach((label, index) => {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.textContent = label;
+                td.addEventListener('click', () => {
+                    window.location.href = menuUrls[index];
+                });
+                tr.appendChild(td);
+                table.appendChild(tr);
+            });
+            
         }
-        setMenuItems(1);
+
+    setMenuItems();
+
+       
 
     }
 
     static get observedAttributes() {
-        return ['back-url', 'menu-item-1-label', 'menu-item-1-url'];
+        return ['back-url', 'menu-item-labels', 'menu-item-urls'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -65,12 +91,14 @@ class MainNavigation extends HTMLElement {
         }
         if (oldValue !== newValue) {
             this.render();
+            this.connectedCallback();
         }
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue !== newValue) {
             this.render();
+            this.connectedCallback();
         }
     }
 
@@ -124,20 +152,19 @@ class MainNavigation extends HTMLElement {
                 }
 
                 .hidden {
-                    display: none;
+                    height: 0 !important;
+                    overflow: hidden;
                 }
 
                 #menu {
                     position: fixed;
-                    top: 30px;
+                    top: 80px;
                     left: 0;
                     background-color: #f1f1f1;
                     width: 100vw;
-                    /* height full window minus 30px */
-                    height: calc(100vh - 30px);
-                    
+                    height: calc(100vh - 80px);
                     overflow: hidden;
-                    transition: height 0.3s;
+                    transition: height 0.3s ease-in-out;
                     z-index: 3;
                 }
                
@@ -193,7 +220,7 @@ class MainNavigation extends HTMLElement {
                 <i class="fas fa-arrow-left"></i>
             </div>
 
-            <div id="menubutton" class="hidden">
+            <div id="menubutton" class="">
                 <i class="fas fa-bars"></i>
             </div>
 
@@ -208,6 +235,8 @@ class MainNavigation extends HTMLElement {
                 
             </nav>
         `;
+
+
     }
 }
 

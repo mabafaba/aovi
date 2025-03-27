@@ -5,6 +5,8 @@ const aoviService = function(io){
     const qr = require('qr-image');
     const userService = require('../users');
     const router = express.Router();
+    const { Comments } = require('../comments');
+    const { Rooms } = require('../rooms');
 
     router.use(express.json());
     router.use(express.urlencoded({ extended: true }));
@@ -56,6 +58,43 @@ const aoviService = function(io){
     });
     
 
+    // evententry/:event
+    router.get('/views/events/:event/network', userService.authorizeBasic, redirectUnauthorized, (req, res) => {
+        res.sendFile(__dirname + '/client/network.html');
+    });
+    
+
+    router.get('/eventjson/:event', userService.authorizeBasic, redirectUnauthorized, async (req, res) => {
+        console.log("getting event comments json")
+       try{ 
+        
+        const event = await Rooms.findById(req.params.id);
+        // populate event.containsRooms
+        const rooms = await Rooms.find({ _id: { $in: event.containsRooms } });
+
+        comments = [];
+
+        rooms.forEach(async (room) => {
+            Comments.find({ room: room._id }, (err, roomComments) => {
+                comments = comments.concat(roomComments);
+            }
+            );
+        });
+
+        console.log('comments', comments);
+
+        // send comments as json
+        res.status(200).send(comments);
+        } catch(error){
+         
+        res.status(404).json({ message: 'Event not found' });
+
+        }
+
+
+    });
+
+
 
     router.get('/events/:event/qr', userService.authorizeBasic, redirectUnauthorized, (req, res) => {
         // generate qr code for url
@@ -74,11 +113,17 @@ const aoviService = function(io){
         console.log('originalUrl', originalUrl);
         console.log('completeUrl', completeUrl);
     
-        const targetLink = protocol + '://' + host + '/aovi/views/events/' + req.params.event;
+        const targetLink = protocol + '://' + host + '/aovi/views/events/' + req.params.event + "/registration";
     
         const code = qr.image(targetLink, { type: 'png' });
         res.setHeader('Content-type', 'image/png');
         code.pipe(res);
+    });
+
+
+    // root should go to event list
+    router.get('/', userService.authorizeBasic, redirectUnauthorized, (req, res) => {
+        res.redirect('/aovi/views/events');
     });
 
     return router;

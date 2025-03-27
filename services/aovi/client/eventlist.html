@@ -77,6 +77,20 @@
 
         .event * {}
 
+
+        .eventName {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        
         tr {
             margin: 20px;
             padding: 50px;
@@ -84,7 +98,9 @@
 
         img {
             float:left;
-            width:20%;
+            width:50%;
+            margin-right:20px;
+            cursor:pointer;
         }
 
         table  {
@@ -105,10 +121,49 @@
             margin: 10px;
             border-radius: 10px; */
         }
+
+        .eventDetails {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            /* animate height */
+            transition: height 2s;
+        }
+
+        .eventDetails.collapsed {
+            position: relative;
+            height: 0 !important;
+            overflow: hidden;
+            padding: 0 !important;
+            margin:0 !important;
+            transition: height 2s;
+        }
+
+        .collapsible {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            user-select: none;
+        }
+
+        .arrow {
+            display: inline;
+            margin-right: 8px;
+            transition: transform 0.5s ease;
+            content: '▶';
+        }
+
+        .arrow.collapsed {
+            transform: rotate(90deg);
+        }
+
     </style>
 </head>
 <body>
-    <main-navigation></main-navigation>
+    <main-navigation
+        menu-item-labels='["All Events","New Event", "Logout"]'
+        menu-item-urls='["/aovi/views/events","/aovi/views/events/create","/aovi/user/logout"]'
+    ></main-navigation>
     <div id="app">
         
     
@@ -121,27 +176,32 @@ const t = translator({
     'en': {
         'register': 'Register',
         'overview': 'Go to Overview',
-        'timeline': 'Go to Timeline'
+        'timeline': 'Go to Timeline',
+        'network': 'Go to Network'
     },
     'pt': {
         'register': 'Registrar',
         'overview': 'Ir para Visão Geral',
-        'timeline': 'Ir para Linha do Tempo'
+        'timeline': 'Ir para Linha do Tempo',
+        'network': 'Ir para Rede'
     },
     'es': {
         'register': 'Registrarse',
         'overview': 'Ir a la Visión General',
-        'timeline': 'Ir a la Línea de Tiempo'
+        'timeline': 'Ir a la Línea de Tiempo',
+        'network': 'Ir a la Red'
     },
     'fr': {
         'register': 'S\'inscrire',
         'overview': 'Aller à l\'Aperçu',
-        'timeline': 'Aller à la Chronologie'
+        'timeline': 'Aller à la Chronologie',
+        'network': 'Aller au Réseau'
     },
     'de': {
         'register': 'Registrieren',
         'overview': 'Zur Übersicht',
-        'timeline': 'Zum Zeitstrahl'
+        'timeline': 'Zum Zeitstrahl',
+        'network': 'Zum Netzwerk'
     }
 });
 
@@ -199,19 +259,45 @@ async function getEvents (){
             app.prepend(eventDiv);
             // append name as h2a
             const eventName = document.createElement('h2');
+            // add class
+            eventName.className = 'eventName';
             eventName.textContent = event.name;
             eventDiv.appendChild(eventName);
-            
+
+            // arrow div
+            // const arrow = document.createElement('div');
+            // arrow.className = 'arrow';
+            // arrow.textContent = '▶';
+            // eventName.prepend(arrow);
+
+            const eventDetailsDiv = document.createElement('div');
+            eventDetailsDiv.className = 'eventDetails';
+            eventDetailsDiv.classList.add('collapsed');
+
+
+
+            // on click, toggle the class
+            eventName.addEventListener('click', () => {
+                eventDetailsDiv.classList.toggle('collapsed');
+            });
+
+
             const qrImage = document.createElement('img');
             qrImage.src = `/aovi/events/${event._id}/qr`;
+            // on click, open qr link  in new tab
+            qrImage.addEventListener('click', () => {
+                // don't bubble
+                
+                window.open(`/aovi/events/${event._id}/qr`, '_blank');
+            });
             // 100% width
-            qrImage.style.width = '100px';
+            // qrImage.style.width = '100px';
 
-            eventDiv.appendChild(qrImage);
+            eventDetailsDiv.appendChild(qrImage);
 
             const table = document.createElement('table');
       
-            eventDiv.appendChild(table);
+            eventDetailsDiv.appendChild(table);
 
             const registrationRow = document.createElement('tr');
             const registrationCell = document.createElement('td');
@@ -244,6 +330,20 @@ async function getEvents (){
             timelineCell.appendChild(timelineLink);
             timelineRow.appendChild(timelineCell);
             table.appendChild(timelineRow);
+
+            const networkRow = document.createElement('tr');
+            const networkCell = document.createElement('td');
+            const networkLink = document.createElement('a');
+            networkLink.className = 'link';
+            networkLink.setAttribute('data-translator-text', 'network');
+            networkLink.href = `/aovi/views/events/${event._id}/network`;
+            networkLink.textContent = t('network');
+            networkCell.appendChild(networkLink);
+            networkRow.appendChild(networkCell);
+            table.appendChild(networkRow);
+
+            eventDiv.appendChild(eventDetailsDiv);
+
         });
     });
   

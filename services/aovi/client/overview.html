@@ -106,7 +106,10 @@
     </style>
 </head>
 <body>
-    <main-navigation></main-navigation>
+    <main-navigation
+    menu-item-labels='["All Events","New Event", "Logout"]'
+    menu-item-urls='["/aovi/views/events","/aovi/views/events/create","/aovi/user/logout"]'
+></main-navigation>
     <div id="app">
        
     
@@ -413,6 +416,7 @@ async function init() {
                     const commentDiv = commentAsHtmlDiv(comment);
                     roomDiv.appendChild(commentDiv);
                 });
+                setLanguage();
             });
 
             updateCommentDisplay = function(){
@@ -424,6 +428,8 @@ async function init() {
                     const commentDiv = commentAsHtmlDiv(comment);
                     roomDiv.appendChild(commentDiv);
                 });
+                // set langauge
+                setLanguage();
             }
 
             roomDiv.appendChild(sortingInput);

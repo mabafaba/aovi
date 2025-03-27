@@ -212,10 +212,12 @@ router.post('/reaction/:id', async (req, res) => {
 );
 
 
+
+
 return router;
 }
 
 
 
 // Export the service
-module.exports = commentService;
+module.exports = {router:commentService,Comment};

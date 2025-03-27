@@ -74,7 +74,7 @@ class CommentListComponent extends HTMLElement {
             this.renderComments();
         });
 
-        const userCategoriesCheckboxes = docu§ment.createElement('div');
+        const userCategoriesCheckboxes = document.createElement('div');
         userCategoriesCheckboxes.id = 'userCategoriesCheckboxes';
 
         this.userCategories.forEach(category => {

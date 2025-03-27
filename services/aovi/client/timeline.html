@@ -166,6 +166,13 @@ async function init (){
                 'Content-Type': 'application/json'
                 }
             })
+            .then(response =>{
+                // if 401, go to login
+                if(response.status == 401){
+                    window.location.href = '/aovi/login';
+                }
+                return response;
+            })
             .then(response => response.json())
             .catch((error) => {
                 console.error('Error fetching comment data:', error);
@@ -211,6 +218,18 @@ async function init (){
         const commentDiv = document.createElement("div");
         commentDiv.innerHTML = comment.text;
         commentDiv.id = comment._id;
+        commentDiv.style.fontSize = "12px";
+        commentDiv.style.fontWeight = "normal";
+        //max width of 200px
+        commentDiv.style.width = "200px";
+        commentDiv.style.wordWrap = "break-word";
+        commentDiv.style.overflowWrap = "break-word";
+        commentDiv.style.whiteSpace = "normal";
+        // if more than 3 lines high, scroll
+        commentDiv.style.maxHeight = "50px";
+        commentDiv.style.overflowY = "auto";
+        commentDiv.style.display = "block";
+
         // more agree than disagree?
         if(comment.usersAgree > comment.usersDisagree){
             commentDiv.style.backgroundColor = "lightgreen";
@@ -239,6 +258,7 @@ async function init (){
         socket.on('comment created', (comment) => {
             console.log('Comment created:', comment);
             const commentDiv = commentAsEventDiv(comment).outerHTML;
+
             
             
             console.log(comment.createdAt);

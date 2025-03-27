@@ -80,8 +80,11 @@ router.post('/', async (req, res) => {
                 []
             }
 
+            console.log('trying roomData', roomData);
             const room = new Room(roomData);
+            console.log('as room ob ject', room);
             await room.save();
+            console.log('room saved', room);
 
             if(req.body.parent){
                 const parentRoom = await Room.findById(req.body.parent.toString());

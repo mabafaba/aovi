@@ -146,6 +146,9 @@ class CommentInput extends HTMLElement {
             cursor: pointer;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border: none;
+            height: 40px;
+            width: 100%;
+            margin: auto;
         }
         </style>
 
@@ -165,7 +168,7 @@ class CommentInput extends HTMLElement {
 <label for="theme1">${this.themes[2]}</label>
 </div>
         </div>
-        <textarea data-translator-placeholder="Write your comment..."></textarea>
+        <textarea data-translator-placeholder="Write your comment..." maxlength="600"></textarea>
         <button class="sendMessageButton" data-translator-text="Send"></button>
         </div>
     `;
@@ -208,6 +211,7 @@ class CommentInput extends HTMLElement {
    
 
     async sendComment() {
+        console.log('attempting to send comment');
         const textarea = this.shadowRoot.querySelector('textarea');
         const comment = textarea.value.trim();
         const userCategories = JSON.parse(localStorage.getItem('userCategories') || '{}');
@@ -229,11 +233,20 @@ class CommentInput extends HTMLElement {
                     },
                     body: JSON.stringify(body)
                 });
+                console.log('response', response);
+
 
                 if (response.ok) {
                     textarea.value = '';
+                    // document wide event 
+                    document.dispatchEvent(new CustomEvent('<comment-input>: posted successfully', { detail: body }));
                 } else {
-                    alert('Failed to send comment - please check your connection');
+                    console.log('Failed to send comment', response);
+                    // if 401, redirect to login
+                    if (response.status === 401) {
+                        window.location.href = '/aovi/views/login?targeturl=' + window.location.pathname;
+                    }
+                    // alert('Failed to send comment - please check your connection');
                 }
             } catch (error) {
                 console.error('Error:', error);
