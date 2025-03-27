@@ -111,20 +111,6 @@
             </div>
         </div>
 
-        
-        <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
-            <label for="theme1">Theme 1:</label>
-            <input type="text" id="theme1" name="theme1" placeholder="Theme 1">
-        </div>
-        <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
-            <label for="theme2">Theme 2:</label>
-            <input type="text" id="theme2" name="theme2" placeholder="Theme 2">
-        </div>
-        <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
-            <label for="theme3">Theme 3:</label>
-            <input type="text" id="theme3" name="theme3" placeholder="Theme 3">
-        </div>
-
 
 
 
@@ -184,20 +170,14 @@
             var room2title = document.getElementById('room2title').value;
             var room3name = document.getElementById('room3name').value;
             var room3title = document.getElementById('room3title').value;
-
-            var theme1 = document.getElementById('theme1').value;
-            var theme2 = document.getElementById('theme2').value;
-            var theme3 = document.getElementById('theme3').value;
-            var themes = [theme1, theme2, theme3]
             var tabletags = tableTags.data
 
             const adminBoundary = document.getElementById('adminBoundariesDropdown').value;
 
-            const mainRoomData = {name: name, title: title, data: {userCategories:tabletags, themes: themes, adminBoundary: adminBoundary}}
-            const room1Data = {name: room1name, title: room1title, data: {userCategories:tabletags, themes: themes, adminBoundary: adminBoundary}}
-            const room2Data = {name: room2name, title: room2title, data: {userCategories:tabletags, themes: themes, adminBoundary: adminBoundary}}
-            const room3Data = {name: room3name, title: room3title, data: {userCategories:tabletags, themes: themes, adminBoundary: adminBoundary}}
-            console.log('using data', mainRoomData);
+            const mainRoomData = {name: name, title: title, data: {userCategories:tabletags, adminBoundary: adminBoundary}}
+            const room1Data = {name: room1name, title: room1title, data: {userCategories:tabletags, adminBoundary: adminBoundary}}
+            const room2Data = {name: room2name, title: room2title, data: {userCategories:tabletags, adminBoundary: adminBoundary}}
+            const room3Data = {name: room3name, title: room3title, data: {userCategories:tabletags, adminBoundary: adminBoundary}}
             
             const mainroom = await fetch('/aovi/rooms', {
                 method: 'POST',

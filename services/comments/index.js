@@ -101,6 +101,12 @@ router.post('/', async (req, res) => {
         data = req.body.data;
     }
     
+    // check if same user sent same text in the last 5 seconds
+    const lastComment = await Comment.findOne({ text: req.body.text, author: req.body.user.id, createdAt: { $gt: new Date(Date.now() - 5000) } });
+    if (lastComment) {
+        console.log('lastComment', lastComment);
+        return res.status(400).send({ message: 'You cannot send the same comment twice in 5 seconds' });
+    }
 
     try {
         const commentData = {

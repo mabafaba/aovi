@@ -273,11 +273,11 @@ class RegistrationForm extends HTMLElement {
 
         this.t = translator(
             {
-                en: { username: "Username", password: "Password", register: "Register"},
-                es: { username: "Usuario", password: "Contraseña", register: "Registrarse"},
-                fr: { username: "Nom d'utilisateur", password: "Mot de passe", register: "S'inscrire"},
-                de: { username: "Benutzername", password: "Passwort", register: "Registrieren"},
-                pt: { username: "Nome de usuário", password: "Senha", register: "Registrar"},
+                en: { username: "Username", password: "Password", register: "Register", 'confirm password': "Confirm password", "password mismatch": "Passwords do not match"},
+                es: { username: "Usuario", password: "Contraseña", register: "Registrarse", 'confirm password': "Confirmar contraseña", "password mismatch": "Las contraseñas no coinciden"},
+                fr: { username: "Nom d'utilisateur", password: "Mot de passe", register: "S'inscrire", 'confirm password': "Confirmez le mot de passe", "password mismatch": "Les mots de passe ne correspondent pas"},
+                de: { username: "Benutzername", password: "Passwort", register: "Registrieren", 'confirm password': "Bestätigen Sie das Passwort", "password mismatch": "Passwörter stimmen nicht überein"},
+                pt: { username: "Nome de usuário", password: "Senha", register: "Registrar", 'confirm password': "Confirme a senha", "password mismatch": "As senhas não coincidem"},
               });
 
 
@@ -318,6 +318,8 @@ class RegistrationForm extends HTMLElement {
                 <input type="text" id="username" required/><br>
                 <label for="password">${this.t('password')}</label><br>
                 <input type="password" id="password" required><br>
+                <label for="confirm-password">${this.t('confirm password')}</label><br>
+                <input type="password" id="confirm-password" required><br>
                 <input type="button" id='registrationButton' value="${this.t('register')}"><br>
             </form>
         `;
@@ -342,6 +344,12 @@ class RegistrationForm extends HTMLElement {
 
         registrationButton.addEventListener('click', async (e) => {
             console.log('submitting registration form');
+
+            // stop if password and confirm password don't match
+            if (password.value !== this.shadowRoot.querySelector('#confirm-password').value) {
+                display.textContent = this.t('password mismatch');
+                return;
+            }
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();

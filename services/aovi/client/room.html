@@ -49,7 +49,7 @@
 
         text {
             font-family: sans-serif;
-            font-size: 10px;
+            font-size: 13px;
         }
 
       
@@ -59,7 +59,7 @@
             border: 1px dotted #9b00b0;
             color: #9b00b0;
             position: relative;
-            font-size: 15px;
+            font-size: 17px;
             font-weight: bold;
             text-align: center;
             border-radius:10px;
@@ -67,7 +67,7 @@
             align-items: center;
             justify-content: center;
             /* thin text */
-            font-weight:200;
+            /* font-weight:200; */
 
         }
 
@@ -102,7 +102,6 @@
         let me;
         let roomID;
         let eventID;
-        let themes = ['1','2','3'];
 
         async function loadData (){
 
@@ -145,7 +144,6 @@
 
     console.log('Room data:', roomData);
 
-    themes = roomData.data.themes || ['1','2','3'];
 
 }
 
@@ -157,10 +155,9 @@ loadData().then(() => {
      room="${roomID}"
      back-url="/aovi/views/events/${eventID}"
      ></main-navigation>`;
-    console.log("THMES LOADED", themes);
      const appHtml =  `<div id="question"></div>
     <display-comments-as-chat room="${roomID}"></display-comments-as-chat>
-    <comment-input room="${roomID}" theme1="${themes[0]}" theme2="${themes[1]}" theme3="${themes[2]}"></comment-input>
+    <comment-input room="${roomID}"></comment-input>
     `;
     document.body.innerHTML = navigationHtml + document.body.innerHTML;
     document.getElementById('app').innerHTML = appHtml;

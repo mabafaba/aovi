@@ -65,17 +65,17 @@ const createNewUser = async (userinfo, UserModelExtension) => {
     // }
    createNewUser({username, password})
         .then((user) => {
-          const maxAge = 3 * 60 * 60;
+          const maxAge = 24 * 60 * 60; // lasts: 24hrs in sec
           const token = jwt.sign(
             { id: user._id, username, role: user.role },
             jwtSecret,
             {
-              expiresIn: maxAge, // 3hrs
+              expiresIn: maxAge, // 
             }
           );
           res.cookie("jwt", token, {
             httpOnly: true,
-            maxAge: maxAge * 1000,
+            maxAge: maxAge * 1000, // 
           });
           res.status(201).json({
             message: "User successfully created",
@@ -114,7 +114,7 @@ const createNewUser = async (userinfo, UserModelExtension) => {
         // comparing given password with hashed password
         bcrypt.compare(password, user.password).then(function (result) {
           if (result) {
-            const maxAge = 3 * 60 * 60;
+            const maxAge = 24 * 60 * 60;
             const token = jwt.sign(
               { id: user._id, username, role: user.role },
               jwtSecret,

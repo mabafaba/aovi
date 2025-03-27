@@ -4,7 +4,6 @@ class CommentInput extends HTMLElement {
         this.attachShadow({ mode: 'open' });
 
         this.room = "default-room";
-        this.themes = ['1','2','3'];
 
         const translator = function (translations, onLanguageChange, scope = document) {
             if (!onLanguageChange) {
@@ -71,22 +70,27 @@ class CommentInput extends HTMLElement {
             'en': {
                 'Write your comment...': 'Write your comment...',
                 'Send': 'Send',
-                'Select theme': 'Select theme'
+                'Comment cannot be empty.': 'Comment cannot be empty.',
+                'Failed to send comment': 'Failed to send comment',
             },
             'de': {
                 'Write your comment...': 'Schreibe deinen Kommentar...',
                 'Send': 'Senden',
-                'Select theme': 'Thema auswählen'
-            },
+                'Comment cannot be empty.': 'Kommentar darf nicht leer sein.',
+                'Failed to send comment': 'Kommentar konnte nicht gesendet werden',
+                    },          
             'fr': {
                 'Write your comment...': 'Écrivez votre commentaire...',
                 'Send': 'Envoyer',
-                'Select theme': 'Sélectionner le thème'
+                'Comment cannot be empty.': 'Le commentaire ne peut pas être vide.',
+                'Failed to send comment': 'Échec de l\'envoi du commentaire',
+
             },
             'pt': {
                 'Write your comment...': 'Escreva seu comentário...',
                 'Send': 'Enviar',
-                'Select theme': 'Selecione o tema'
+                'Comment cannot be empty.': 'O comentário não pode estar vazio.',
+                'Failed to send comment': 'Falha ao enviar comentário',
             }
         };
 
@@ -97,14 +101,7 @@ class CommentInput extends HTMLElement {
 
     render(){
 
-        
-        // get themes from attributes
-        
-    const theme1 = this.getAttribute('theme1');
-    const theme2 = this.getAttribute('theme2');
-    const theme3 = this.getAttribute('theme3');
-    this.themes = [theme1, theme2, theme3];
-    console.log("THEMES", this.themes);
+                
 
 
 
@@ -122,37 +119,16 @@ class CommentInput extends HTMLElement {
         }
 
         @media screen and (max-height: 570px) {
-            .comment-box textarea {
+            /* .comment-box textarea {
                 height: 1em !important;
-            }
+            } */
 
             .sendMessageButton {
                 height: 25px !important;
             }
 
-            .comment-box .radio-group {
-                font-size:0.4em !important;
-            }
         }
 
-
-        .comment-box .radio-group {
-            display: table;
-            width: 100%;
-            margin-bottom: 10px;
-            font-size: 0.6em;
-            color: #666;
-        }
-        .comment-box .radio-group div {
-            display: table-row;
-        }
-        .comment-box .radio-group label,
-        .comment-box .radio-group input[type="radio"] {
-            display: table-cell;
-            vertical-align: middle;
-            padding: 0px;
-            margin: 0px;
-        }
 
         .sendMessageButton {
             background-color: #9b00b0;
@@ -169,20 +145,6 @@ class CommentInput extends HTMLElement {
 
         <div class="comment-box">
         <div class="radio-group">
-    <div data-translator-text="Select theme"></div>
-        <div>
-<input type="radio" id="theme2" name="theme" value="${this.themes[0]}">
-<label for="theme2">${this.themes[0]}</label>
-</div>
-<div>
-<input type="radio" id="theme3" name="theme" value="${this.themes[1]}">
-<label for="theme3">${this.themes[1]}</label>
-</div>
-<div>
-<input type="radio" id="theme1" name="theme" value="${this.themes[2]}" checked>
-<label for="theme1">${this.themes[2]}</label>
-</div>
-        </div>
         <textarea data-translator-placeholder="Write your comment..." maxlength="600"></textarea>
         <button class="sendMessageButton" data-translator-text="Send"></button>
         </div>
@@ -230,13 +192,11 @@ class CommentInput extends HTMLElement {
         const textarea = this.shadowRoot.querySelector('textarea');
         const comment = textarea.value.trim();
         const userCategories = JSON.parse(localStorage.getItem('userCategories') || '{}');
-        const commentTheme = this.shadowRoot.querySelector('input[name="theme"]:checked').value;
         const body = { 
             "text": comment,
             'room': this.room,
             'data': {
                 'userCategories': userCategories,
-                'commentTheme': commentTheme
             }
          };
         if (comment) {
@@ -261,15 +221,14 @@ class CommentInput extends HTMLElement {
                     if (response.status === 401) {
                         window.location.href = '/aovi/views/login?targeturl=' + window.location.pathname;
                     }
-                    // alert('Failed to send comment - please check your connection');
+                    alert(this.t('Failed to send comment'));
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while sending the comment.');
+                alert(this.t('Failed to send comment'));
             }
         } else {
-            alert('Comment cannot be empty.');
-        }
+            alert(this.t('Comment cannot be empty.'));     }
     }
 }
 

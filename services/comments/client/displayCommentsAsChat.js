@@ -134,10 +134,17 @@ class CommentsAsChat extends HTMLElement {
             
             this.shadowRoot.querySelectorAll('.reaction-buttons button').forEach(button => {
                 button.addEventListener('click', (event) => {
-                    const targetedButton = event.target;
+                    let targetedButton = event.target;
+                    if (targetedButton.tagName !== 'BUTTON') {
+                        targetedButton = targetedButton.closest('button');
+                    }
+                    if (!targetedButton) return;
+
                     const notTargetedButtons = Array.from(targetedButton.parentElement.children).filter(button => button !== targetedButton);
                     notTargetedButtons.forEach(button => button.classList.add('passive-button'));
+                    notTargetedButtons.forEach(button => button.classList.remove('active-button'));
                     targetedButton.classList.remove('passive-button');
+                    targetedButton.classList.add('active-button');
                 });
             });
         } catch (error) {
@@ -359,17 +366,17 @@ class CommentsAsChat extends HTMLElement {
             }
 
             .comment {
-                color:black;
-                float:right;
+                color: black;
+                float: right;
                 position: relative;
                 background-color: rgba(208, 208, 208, 0.76);
-                width: 70%;
-                padding: 20px;
-                border-radius: 40px;
+                width: 90%;
+                padding: 5px;
+                border-radius: 15px;
+                    border-bottom-right-radius: 15px;
                 border-bottom-right-radius: 0;
-                margin-bottom: 10%;
-                margin-height:10%;
-                min-height: 50px;
+                margin-bottom: 10px;
+                min-height: 30px;
                 display: flex;
                 flex-direction: column;
                 align-items: flex-end;
@@ -382,6 +389,7 @@ class CommentsAsChat extends HTMLElement {
                 overflow-y: scroll;
             }
             #disagree-button {
+                color:black;
                 background-color:rgb(240, 67, 67);
                 border-radius: 0;
                 border-top-left-radius: 10px;
@@ -390,6 +398,7 @@ class CommentsAsChat extends HTMLElement {
                 margin:0px;
             }
             #neutral-button {
+                color:black;
                 background-color:rgb(192, 194, 184);
                 border-radius: 0;
                 margin-right: 0;
@@ -397,6 +406,7 @@ class CommentsAsChat extends HTMLElement {
             }
 
             #agree-button {
+                color:black;
                 background-color:rgb(67, 240, 128);
                 border-radius: 0;
                 margin-left: 0;
@@ -423,11 +433,19 @@ class CommentsAsChat extends HTMLElement {
                 border-radius: 5px;
                 margin: 5px;
                 cursor: pointer;
+                filter: saturate(100%) brightness(100%);
             }
 
             .passive-button {
-                filter: saturate(50%) brightness(50%);
+                filter: saturate(100%) brightness(100%);
             }
+
+            .active-button {
+                filter: saturate(50%) brightness(50%);
+                /* shadow to look like its pressed in */
+                box-shadow: inset 0px 0px 5px 0px rgba(0,0,0,0.75);
+            }
+
 
             .time {
                 font-size:9px;
@@ -437,19 +455,21 @@ class CommentsAsChat extends HTMLElement {
             }
 
             .commentmaintext {
-                font-size:12px;
-                padding:20px;
-                text-align:right;
+                font-size: 15px;
+                padding: 0px;
+                    padding-bottom: 0px;
+                text-align: right;
+                padding-bottom: 25px;
             }
 
             .button-counter {
-                font-size: 8px;
+                font-size: 12px;
                 padding-right:3px;
                 display:inline;
             }
 
             .button-text {
-                font-size: 8px;
+                font-size: 12px;
                 display:inline;
             }
 

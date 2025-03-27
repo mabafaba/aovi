@@ -49,13 +49,12 @@ customElements.define('comment-component', CommentComponent);
 class CommentListComponent extends HTMLElement {
 
 
-    constructor(comments, userCategories, themes) {
+    constructor(comments, userCategories) {
         super();
         this.attachShadow({ mode: 'open' });
 
         this.comments = comments;
         this.userCategories = userCategories;
-        this.themes = themes;
         this.sortOptions = ['Most Agreed', 'Controversial', 'Most Disagreed', 'Most Neutral', 'Most Votes'];
 
         this.categoricalFilters = [];
@@ -109,7 +108,7 @@ class CommentListComponent extends HTMLElement {
             <div id="controls">
             </div>
             <div id="commentList">
-            ${this.comments.map(comment => `<comment-component text="${comment.text}" usersAgree="${comment.usersAgree}" usersDisagree="${comment.usersDisagree}" usersNeutral="${comment.usersNeutral}" userCategories="${comment.userCategories}" theme="${comment.theme}" commentId="${comment._id}"></comment-component>`).join('')}
+            ${this.comments.map(comment => `<comment-component text="${comment.text}" usersAgree="${comment.usersAgree}" usersDisagree="${comment.usersDisagree}" usersNeutral="${comment.usersNeutral}" userCategories="${comment.userCategories}" commentId="${comment._id}"></comment-component>`).join('')}
             </div>
         `;
 

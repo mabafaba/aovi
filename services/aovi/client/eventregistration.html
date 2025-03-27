@@ -89,6 +89,9 @@
             console.log('Event data:', data);
         const userCategories = data.data.userCategories;
         const inputsDiv = document.getElementById('userGroupInput');
+        // check if user has already selected categories in local storage
+        const storedCategories = JSON.parse(localStorage.getItem('userCategories'));
+       
         userCategories.forEach(category => {
             const label = document.createElement('label');
             label.textContent = category.name;
@@ -101,8 +104,14 @@
                 option.textContent = value;
                 select.appendChild(option);
             });
+            // if category name is in stored categories, and the selected value exists in opritons, set it
+            if (storedCategories && storedCategories[category.name] && category.values.includes(storedCategories[category.name])) {
+                select.value = storedCategories[category.name];
+            }
             inputsDiv.appendChild(select);
         });
+
+        
         })
         .catch((error) => {
             console.error('Error fetching event data:', error);

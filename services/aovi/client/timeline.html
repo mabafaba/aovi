@@ -47,18 +47,12 @@
         }
 
 
-        .themeLabel{
-            writing-mode: sideways-lr; /* options: vertical-rl, sideways-lr, sideways-rl */
-            text-orientation: mixed;
-            font-weight: bold;
-            height:30%;
-        }
         
         table {
             display: table;
             /* position: relative; */
             width: 100%;
-            height: 50vh;
+            height: 100vh;
             border-collapse: collapse;
             margin:0px;
             table-layout: fixed; 
@@ -103,7 +97,6 @@
     <!-- <svg width="960" height="600"></svg> -->
     <script>
 
-themes = [];
 async function init (){
         const me = fetch('/aovi/user/me', {
             method: 'GET',
@@ -138,8 +131,6 @@ async function init (){
             console.error('Error fetching event data:', error);
         });
 
-        themes = event.data.themes || [];
-        console.log('Themes:', themes);
 
         rooms = [];
         console.log('Event data:', event);
@@ -261,17 +252,18 @@ async function init (){
             console.log('Comment created:', comment);
             const commentDiv = commentAsEventDiv(comment).outerHTML;
 
-            
+            const commentTimeline = document.getElementById('app').querySelector('comments-timeline');
+
             
             console.log(comment.createdAt);
             const createdAtTimestamp = new Date(comment.createdAt).getTime();
             console.log('getting timeline:', comment);
-            const commentTimeline = document.getElementById(comment.data.commentTheme);
             commentTimeline.addEvent(createdAtTimestamp, commentDiv);
         });
 
         socket.on('comment reacted', (comment) => {
-            const commentTimeline = document.getElementById(comment.data.commentTheme);
+            // get timeline
+            const commentTimeline = document.getElementById('app').querySelector('comments-timeline');
             console.log('Comment reacted:', comment);
             // find the comment div by id = comment._id
             console.log(comment._id);
@@ -292,7 +284,7 @@ async function init (){
 
 
 
-    init().then((comments) => {
+    init().then(async (comments) => {
         
         // unique room ids
         const roomIDs = [...new Set(comments.map(comment => comment.room))];
@@ -303,40 +295,28 @@ async function init (){
 
         const table = document.createElement('table');
         document.getElementById('app').appendChild(table);
-        themes.forEach(async theme => {
-            const themeComments = comments.filter(comment => comment.data.commentTheme == theme);
-            console.log('Theme:', theme);
-            console.log('Comments:', themeComments);
+       
 
         const commentTimeline = document.createElement('comments-timeline');
-        commentTimeline.id = theme;
-
-        themeLabel = document.createElement('h5');
-        themeLabel.textContent = theme;
-        themeLabel.classList.add('themeLabel');
 
         // new row in table
         const tr = document.createElement('tr');
-        const td = document.createElement('td');
-        td.appendChild(themeLabel);
         // new column
         const td2 = document.createElement('td');
         td2.appendChild(commentTimeline);
-        tr.appendChild(td);
         tr.appendChild(td2);
         table.appendChild(tr);
         // append to app
         document.getElementById('app').appendChild(table);
 
-        for (const comment of themeComments) {
+        for (const comment of comments) {
             const createdAtTimestamp = new Date(comment.createdAt).getTime();
             commentTimeline.addEvent(createdAtTimestamp, commentAsEventDiv(comment).outerHTML);
             await new Promise(resolve => setTimeout(resolve, 0)); // Wait one tick
         }
     
 
-        });
-        
+ 
     });
 
   
