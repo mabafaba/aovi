@@ -39,15 +39,15 @@ router.use(express.json());
 
 // Delete all rooms
 // log in red to console
-console.log('\x1b[31m%s\x1b[0m', 'WARNING: ROUTE TO DELETE ROOMS OPEN');
-router.get('/wipe', async (req, res) => {
-    try {
-        await Room.deleteMany();
-        res.status(200).send({ message: 'All rooms deleted' });
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
+// console.log('\x1b[31m%s\x1b[0m', 'WARNING: ROUTE TO DELETE ROOMS OPEN');
+// router.get('/wipe', async (req, res) => {
+//     try {
+//         await Room.deleteMany();
+//         res.status(200).send({ message: 'All rooms deleted' });
+//     } catch (error) {
+//         res.status(500).send(error);
+//     }
+// });
 
 
 // Create a new room

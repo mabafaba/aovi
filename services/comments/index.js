@@ -63,17 +63,17 @@ router.use('/static', express.static('./services/comments/client'));
 // expect json
 router.use(express.json());
 
-// Delete all comments
-router.get('/wipe', async (req, res) => {
-    try {
-        await Comment.deleteMany();
-        // emit to all other clients
-        io.emit('all comments deleted');
-        res.status(200).send({ message: 'All comments deleted' });
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
+// // Delete all comments
+// router.get('/wipe', async (req, res) => {
+//     try {
+//         await Comment.deleteMany();
+//         // emit to all other clients
+//         io.emit('all comments deleted');
+//         res.status(200).send({ message: 'All comments deleted' });
+//     } catch (error) {
+//         res.status(500).send(error);
+//     }
+// });
 
 
 // Create a new comment
