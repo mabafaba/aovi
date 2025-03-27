@@ -22,23 +22,36 @@
         /* heights */
         #question {
             /* total 25 */
-            height: 10%;
-            margin-top:5%;
-            margin-bottom:5%;
+            /* height: 10%; */
+            /* margin-top:5%; */
+            /* margin-bottom:5%; */
             padding-top:2.5%;
-            padding-bottom:2.5%;
+            padding:15px;
+            /* padding-bottom:2.5%; */
 
         }
         display-comments-as-chat {
             /* total 55 */
-            height: 45%;
-            margin-top:5%;
-            margin-bottom:5%;
+            /* height: 45%; */
+            /* margin-top:5%; */
+            /* margin-bottom:5%; */
+            /* fill rest of available vertical space */
+            flex-grow: 1;
+            min-height: 0;
+            margin-top:5px;
+            margin-bottom:15px;
+            /* box-shadow: inset 3px 3px 6px #0006; */
+            background: linear-gradient(145deg, #e6e6e6, #ffffff);
+            box-shadow:  8px 8px 11px #dbdbdb;
+            
+            border: white;
+            border-radius: 9px;
+
         }
 
         comment-input {
             /* total 20 */
-            height: 30%;
+            /* height: 30%; */
             padding-bottom:5%;
             width:100%;
             position: relative;
@@ -55,9 +68,12 @@
       
         #question {
             
-            border-color: #9b00b0;
-            border: 1px dotted #9b00b0;
+            /* border-color: #9b00b0; */
+            /* border: 1px dotted #9b00b0; */
             color: #9b00b0;
+            background: linear-gradient(145deg, #e6e6e6, #ffffff);
+            box-shadow:  8px 8px 11px #dbdbdb,
+             -8px -8px 11px #ffffff;
             position: relative;
             font-size: 17px;
             font-weight: bold;
@@ -66,6 +82,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-top:15px;
+            margin-bottom:10px;
             /* thin text */
             /* font-weight:200; */
 

@@ -14,16 +14,32 @@
     <style>
         .enterRoomButton {
             position: relative;
-            right: 0 !important;
+            /* right: 0 !important; */
 
             margin:0px;
-            margin-top:15px;
-
+            margin-top:5px;
+            float:right;
+            bottom: auto;
+            left: auto;
+            right: auto;
+            margin-bottom:10px;
              
         }
 
         #app {
             overflow-y: scroll;
+        }
+
+        .roomContainer {
+            background: linear-gradient(145deg, #e6e6e6, #ffffff);
+            box-shadow:  8px 8px 11px #dbdbdb,
+             -8px -8px 11px #ffffff;
+             border:none;
+                border-radius: 9px;
+                margin-bottom:20px;
+                padding:15px;
+                padding-bottom:0px;
+                position:relative;
         }
 
     </style>
@@ -111,10 +127,10 @@
                 // create a container div for each room
                 const roomContainer = document.createElement('div');
                 roomContainer.className = 'roomContainer';
-                roomContainer.style.border = '1px solid #ccc';
-                roomContainer.style.padding = '10px';
-                roomContainer.style.margin = '10px';
-                roomContainer.style.borderRadius = '10px';
+                // roomContainer.style.border = '1px solid #ccc';
+                // roomContainer.style.padding = '10px';
+                // roomContainer.style.margin = '10px';
+                // roomContainer.style.borderRadius = '10px';
                 
                 // create a label for the room name
                 const roomLabel = document.createElement('div');

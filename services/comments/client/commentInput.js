@@ -116,18 +116,20 @@ class CommentInput extends HTMLElement {
             width: 100%;
             height: 80%;
             margin-bottom: 10px;
-        }
+            box-shadow: inset 3px 3px 6px #0006;
+            /* background: linear-gradient(145deg, #cacaca, #f0f0f0);
+            box-shadow:  4px 4px 8px #bebebe, */
+             -4px -4px 8px #ffffff;
+            border: white;
+            border-radius: 9px;
+            height: 5em;
+            padding:15px;
+            box-sizing:border-box;
+            font-size: 16px;
 
-        @media screen and (max-height: 570px) {
-            /* .comment-box textarea {
-                height: 1em !important;
-            } */
-
-            .sendMessageButton {
-                height: 25px !important;
             }
 
-        }
+    
 
 
         .sendMessageButton {
@@ -144,7 +146,6 @@ class CommentInput extends HTMLElement {
         </style>
 
         <div class="comment-box">
-        <div class="radio-group">
         <textarea data-translator-placeholder="Write your comment..." maxlength="600"></textarea>
         <button class="sendMessageButton" data-translator-text="Send"></button>
         </div>

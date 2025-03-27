@@ -367,20 +367,18 @@ class CommentsAsChat extends HTMLElement {
 
             .comment {
                 color: black;
-                float: right;
-                position: relative;
-                background-color: rgba(208, 208, 208, 0.76);
-                width: 90%;
-                padding: 5px;
-                border-radius: 15px;
-                    border-bottom-right-radius: 15px;
-                border-bottom-right-radius: 0;
-                margin-bottom: 10px;
-                min-height: 30px;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                word-wrap: break-word;
+            float: right;
+            position: relative;
+            width: calc(100% - 15px);
+            padding: 5px;
+                padding-right: 5px;
+            padding-right: 15px;
+            min-height: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            word-wrap: break-word;
+            border-bottom: 2px dotted lightgray;
                 
             }
             #comments-container {
@@ -390,7 +388,7 @@ class CommentsAsChat extends HTMLElement {
             }
             #disagree-button {
                 color:black;
-                background-color:rgb(240, 67, 67);
+                background-color:rgba(240, 67, 67, 0.49);
                 border-radius: 0;
                 border-top-left-radius: 10px;
                 border-bottom-left-radius: 10px;
@@ -399,7 +397,7 @@ class CommentsAsChat extends HTMLElement {
             }
             #neutral-button {
                 color:black;
-                background-color:rgb(192, 194, 184);
+                background-color:rgba(192, 194, 184, 0.5);
                 border-radius: 0;
                 margin-right: 0;
                 margin-left: 0;
@@ -407,7 +405,7 @@ class CommentsAsChat extends HTMLElement {
 
             #agree-button {
                 color:black;
-                background-color:rgb(67, 240, 128);
+                background-color:rgba(67, 240, 128, 0.5);
                 border-radius: 0;
                 margin-left: 0;
                 border-top-right-radius: 10px;
@@ -433,17 +431,17 @@ class CommentsAsChat extends HTMLElement {
                 border-radius: 5px;
                 margin: 5px;
                 cursor: pointer;
-                filter: saturate(100%) brightness(100%);
+                /* filter: saturate(100%) brightness(100%); */
             }
 
             .passive-button {
-                filter: saturate(100%) brightness(100%);
+                /* filter: saturate(100%) brightness(100%); */
             }
 
             .active-button {
-                filter: saturate(50%) brightness(50%);
+                /* filter: saturate(50%) brightness(50%); */
                 /* shadow to look like its pressed in */
-                box-shadow: inset 0px 0px 5px 0px rgba(0,0,0,0.75);
+                box-shadow: inset 3px 3px 7px -3px rgb(0, 0, 0);
             }
 
 
