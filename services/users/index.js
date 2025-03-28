@@ -42,9 +42,41 @@ const connectDB = require("./js/users.db"); // not required if a db connection e
 // connectDB(); 
 
 
+async function ensureSuperAdmin() {
+const superAdmin = await User.findOne({ username: "superadmin", roles: { $in: ["superadmin"] } });
+if (!superAdmin) {
+    console.log("Superadmin user does not exist. Creating one...");
+    const password = await new Promise((resolve) => {
+        readline.question("Enter superadmin password: ", resolve);
+    });
+    const confirmPassword = await new Promise((resolve) => {
+        readline.question("Confirm superadmin password: ", resolve);
+    });
+
+    if (password !== confirmPassword) {
+        console.log("Passwords do not match. Aborting.");
+        process.exit(1);
+    }
+
+    createNewUser({username: "superadmin", password}, false, ["superadmin", "admin", "basic"])
+    console.log("Superadmin user created successfully.");
+} else {
+    console.log("Superadmin user already exists.");
+}
+}
+
+ensureSuperAdmin().then(() => readline.close());
+
  
 const userApp = express();
 const userRouter = require("./js/users.router");
+const readline = require("readline").createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+
+
 // add view folder to existing app view paths
 // mount 'client' folder
 userApp.use('/static', express.static(path.join(__dirname, 'client')))

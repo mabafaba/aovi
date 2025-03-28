@@ -16,7 +16,10 @@ if(!jwtSecret) {
  * @param {object} UserModelExtension - A model to extend the internal user object. 
  * @returns {void} 
  */
-const createNewUser = async (userinfo, UserModelExtension) => {
+const createNewUser = async (userinfo, UserModelExtension, roles) => {
+  if(!roles){
+    roles = ['basic','admin'];
+  }
   // make sure username and password are provided
   must(userinfo.username, "Username is required");
   must(userinfo.password, "Password is required");
@@ -34,7 +37,7 @@ const createNewUser = async (userinfo, UserModelExtension) => {
   const user = await User.create({
     username: userinfo.username,
       password: hash,
-      role: ['basic','admin'],
+      role: roles,
       data: {}
     })
 

@@ -177,36 +177,51 @@ const t = translator({
         'register': 'Register',
         'overview': 'Go to Overview',
         'timeline': 'Go to Timeline',
-        'network': 'Go to Network'
+        'network': 'Go to Network',
+        'Delete': 'Delete',
+        'You are not authorized to delete this event': 'You are not authorized to delete this event',
+        'Are you sure you want to delete this event?': 'Are you sure you want to delete this event?',
     },
     'pt': {
         'register': 'Registrar',
         'overview': 'Ir para Visão Geral',
         'timeline': 'Ir para Linha do Tempo',
-        'network': 'Ir para Rede'
+        'network': 'Ir para Rede',
+        'Delete': 'Deletar',
+        'You are not authorized to delete this event': 'Você não está autorizado a excluir este evento',
+        'Are you sure you want to delete this event?': 'Você tem certeza de que deseja excluir este evento?',
     },
     'es': {
         'register': 'Registrarse',
         'overview': 'Ir a la Visión General',
         'timeline': 'Ir a la Línea de Tiempo',
-        'network': 'Ir a la Red'
+        'network': 'Ir a la Red',
+        'Delete': 'Eliminar',
+        'You are not authorized to delete this event': 'No estás autorizado a eliminar este evento',
+        'Are you sure you want to delete this event?': '¿Estás seguro de que deseas eliminar este evento?',
     },
     'fr': {
         'register': 'S\'inscrire',
         'overview': 'Aller à l\'Aperçu',
         'timeline': 'Aller à la Chronologie',
-        'network': 'Aller au Réseau'
+        'network': 'Aller au Réseau',
+        'Delete': 'Supprimer',
+        'You are not authorized to delete this event': 'Vous n\'êtes pas autorisé à supprimer cet événement',
+        'Are you sure you want to delete this event?': 'Êtes-vous sûr de vouloir supprimer cet événement?',
     },
     'de': {
         'register': 'Registrieren',
         'overview': 'Zur Übersicht',
         'timeline': 'Zum Zeitstrahl',
-        'network': 'Zum Netzwerk'
+        'network': 'Zum Netzwerk',
+        'Delete': 'Löschen',
+        'You are not authorized to delete this event': 'Sie sind nicht berechtigt, dieses Ereignis zu löschen',
+        'Are you sure you want to delete this event?': 'Sind Sie sicher, dass Sie dieses Ereignis löschen möchten?',
     }
 });
 
 async function getEvents (){
-        const me = fetch('/aovi/user/me', {
+        const me = await fetch('/aovi/user/me', {
             method: 'GET',
             headers: {
             'Content-Type': 'application/json'
@@ -238,24 +253,26 @@ async function getEvents (){
             event.rooms = event.containsRooms.map(roomId => rooms.find(room => room._id === roomId));
         });
 
-        return events;
+        return {events, me};
 
     }
     
 
 
 
-    getEvents().then(events => {
+    getEvents().then(({events, me}) => {
 
         // make a div for each event.
         // attach links for each contained room.
         // attach link for overview and timeline panels
 
         console.log("events:", events);
+        console.log("me:", me);
         const app = document.getElementById('app');
         events.forEach(event => {
             const eventDiv = document.createElement('div');
             eventDiv.className = 'event';
+            eventDiv.setAttribute('data-id', event._id);
             app.prepend(eventDiv);
             // append name as h2a
             const eventName = document.createElement('h2');
@@ -342,11 +359,55 @@ async function getEvents (){
             networkRow.appendChild(networkCell);
             table.appendChild(networkRow);
 
+            // delete button if user is superadmin or if userIsCreator
+            if(me.role.includes('superadmin') || event.userIsCreator){
+                const deleteRow = document.createElement('tr');
+                const deleteCell = document.createElement('td');
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'link';
+                deleteButton.setAttribute('data-translator-text', 'Delete');
+                deleteButton.textContent = t('Delete');
+                deleteButton.addEventListener('click', ()=>{confirmEventDeletion(event._id)});
+                deleteCell.appendChild(deleteButton);
+                deleteRow.appendChild(deleteCell);
+                table.appendChild(deleteRow);
+            }
+
             eventDiv.appendChild(eventDetailsDiv);
 
         });
     });
   
+    const confirmEventDeletion = function (id) {
+        const confirmation = confirm(t('Are you sure you want to delete this event?'));
+        if (confirmation) {
+            deleteEvent(id);
+        }
+    }
+
+    const deleteEvent = function (id) {
+        fetch(`/aovi/rooms/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Event deleted successfully');
+                // remove the event from the DOM
+                const eventDiv = document.querySelector(`.event[data-id="${id}"]`);
+                if (eventDiv) {
+                    eventDiv.remove();
+                }
+            } else {
+                alert(t('You are not authorized to delete this event'));
+            }
+        })
+        .catch((error) => {
+            console.error('Error deleting event:', error);
+        });
+    }
     </script>
 </body>
 </html>

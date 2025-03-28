@@ -15,6 +15,7 @@ async function authorizeToken (token, allowedRoles = ["admin", "basic"]) {
     try {
       const decodedToken = jwt.verify(token, jwtSecret);
       // if user role is an array:
+      
       if(Array.isArray(decodedToken.role)){
         userHasOneOfAuthorizedRoles = allowedRoles.some(role => decodedToken.role.includes(role));
       } else {
@@ -50,6 +51,7 @@ function auth (req, res, next) {
 
   if (token) {
     jwt.verify(token, jwtSecret, async (err, decodedToken) => {
+      console.log("decodedToken", decodedToken);
       if (err) {
         req.body.authorized = false;
         req.body.user = null;
@@ -72,7 +74,7 @@ function auth (req, res, next) {
           
           req.body.user = decodedToken;
           userData = await User.findById(decodedToken.id)
-          if(userData){req.body.user = {id:userData._id, name: userData.username};}
+          if(userData){req.body.user = {id:userData._id, name: userData.username, role:userData.role};}
           req.body.authorized = true;
           next();
           return;
@@ -97,15 +99,16 @@ function auth (req, res, next) {
 // admin auth function
 
 function authorizeAdmin (req, res, next) {
-  req.authorizedRoles = ["admin"];
+  req.authorizedRoles = ["admin", "superadmin"];
   auth(req, res, next);
 }
 
 // basic auth function
 
 function authorizeBasic (req, res, next) {
+  console.log("authorizeBasic");
   
-  req.authorizedRoles = ["admin", "basic"];
+  req.authorizedRoles = ["superadmin", "admin", "basic"];
   auth(req, res, next);
 }
 

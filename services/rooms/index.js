@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const router = require('express').Router();
 const express = require('express');
 const sanitizeHtml = require('sanitize-html');
+const mongooseDelete = require('mongoose-delete');
 // Define the Mongoose schema
 const roomSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -11,6 +12,7 @@ const roomSchema = new mongoose.Schema({
     title: { type: String },
     containsRooms: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Room' }],
 });
+roomSchema.plugin(mongooseDelete, { deletedAt: true, overrideMethods: 'all' });
 
 // Create the Mongoose model
 const Room = mongoose.model('Room', roomSchema);
@@ -174,8 +176,47 @@ router.post('/', async (req, res) => {
             // res.status(500).send(error);
         // }
     });
+
+
+    // Delete a room by ID (only if the user is the creator)
+    router.delete('/:id', async (req, res) => {
+        try {
+            const room = await Room.findById(req.params.id);
+            if (!room) {
+                return res.status(404).send({ message: 'Room not found' });
+            }
+
+            console.log('deleting room', room);
+            console.log('user', req.body.user);
+            console.log('room creator', room.createdBy.toString());
+            const containedRooms = await Room.find({ _id: { $in: room.containsRooms } });
+
+            // log all check values
+            // Check if the user is the creator of the room
+            if ((room.createdBy.toString() === req.body.user.id.toString()) || (req.body.user.role.includes('superadmin'))) {
+                await room.delete();
+            }else{
+                return res.status(403).send({ message: 'You are not authorized to delete this room - ask user'+ room.createdBy.toString() });
+            }
+
+            // delete all contained rooms
+            for (const containedRoom of containedRooms) {
+                if ((containedRoom.createdBy.toString() === req.body.user.id.toString()) || (req.body.user.role.includes('superadmin'))) {
+                    await containedRoom.delete();
+                }else{
+                    return res.status(403).send({ message: 'You are not authorized to delete this room - ask user'+ containedRoom.createdBy.toString() });
+                }
+            }
+            
+            
+            res.status(200).send({ message: 'Room deleted successfully' });
+        } catch (error) {
+            res.status(500).send(error);
+        }
+    });
         
-    
+    // curl example to delete
+    // curl -X DELETE -H "Content-Type: application/json" http://localhost:3000/rooms/649b5e2f4f1a2c001c8e4a1b      
     
     // Export the service
     module.exports = {router, Room};
