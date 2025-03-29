@@ -46,6 +46,11 @@ async function ensureSuperAdmin() {
 const superAdmin = await User.findOne({ username: "superadmin", roles: { $in: ["superadmin"] } });
 if (!superAdmin) {
     console.log("Superadmin user does not exist. Creating one...");
+    // check if a password was passed as // pass environment varibale to docker compose up:
+    /// docker-compose up -e SUPERADMIN_PASSWORD=yourpassword
+    const password = process.env.SUPERADMIN_DEFAULT_PASSWORD;
+    console.log("password", password);
+    if (!password) {
     const password = await new Promise((resolve) => {
         readline.question("Enter superadmin password: ", resolve);
     });
@@ -56,6 +61,7 @@ if (!superAdmin) {
     if (password !== confirmPassword) {
         console.log("Passwords do not match. Aborting.");
         process.exit(1);
+    }
     }
 
     createNewUser({username: "superadmin", password}, false, ["superadmin", "admin", "basic"])

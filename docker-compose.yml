@@ -11,6 +11,7 @@ services:
     environment:
       - DOCKER=true
       - JWT_SECRET_FILE=/run/secrets/jwt_secret
+      - SUPERADMIN_DEFAULT_PASSWORD=${SUPERADMIN_DEFAULT_PASSWORD}  # Pass from shell
     volumes:
       - jwt_secret_volume:/run/secrets
     restart: always
