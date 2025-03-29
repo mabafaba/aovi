@@ -142,6 +142,7 @@ class CommentInput extends HTMLElement {
             height: 40px;
             width: 100%;
             margin: auto;
+            font-size:18px;
         }
         </style>
 
