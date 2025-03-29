@@ -61,16 +61,28 @@ function auth (req, res, next) {
         return;
 
       } else {
+        // log roles
+        console.log("req.authorizedRoles", req.authorizedRoles);
+        console.log("decodedToken.role", decodedToken.role);
+
         // is any user role in array of authorized roles?
         // if user role is an array:
         if(Array.isArray(decodedToken.role)){
+
+      
         userHasOneOfAuthorizedRoles = req.authorizedRoles.some(role => decodedToken.role.includes(role));
+        console.log("userHasOneOfAuthorizedRoles", userHasOneOfAuthorizedRoles);
         } else {
           userHasOneOfAuthorizedRoles = req.authorizedRoles.includes(decodedToken.role);
+          console.log("userHasOneOfAuthorizedRoles (no array)", userHasOneOfAuthorizedRoles);
+
         }
+
+        console.log("userHasOneOfAuthorizedRole further", userHasOneOfAuthorizedRoles);
 
         if (userHasOneOfAuthorizedRoles) {
           // get .data from user if it exists
+          console.log("userHasOneOfAuthorizedRoles true");
           
           req.body.user = decodedToken;
           userData = await User.findById(decodedToken.id)
@@ -99,7 +111,8 @@ function auth (req, res, next) {
 // admin auth function
 
 function authorizeAdmin (req, res, next) {
-  req.authorizedRoles = ["admin", "superadmin"];
+  req.authorizedRoles = ["superadmin"];
+  console.log("authorizeAdmin");
   auth(req, res, next);
 }
 

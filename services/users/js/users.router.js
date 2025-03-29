@@ -7,14 +7,22 @@ const { auth, authorizeAdmin, authorizeBasic} = require("./users.authorize")
 
 const router = express.Router();
 
+const sendUnauthorizedStatus = (req, res, next) => {
+  if (!req.body.authorized) {
+    res.status(401).send('Unauthorized');
+    return;
+  } else {
+    next();
+  }
+}
+
 router.route("/register").post(registerUser);
 router.route("/login").post(loginUser);
 
-router.route("/update").put(authorizeAdmin, updateUser);
-router.route("/delete").delete(authorizeAdmin, deleteUser);
-
-router.route("/all").get(getAllUsers);
-router.route("/me").get(authorizeBasic,
+router.route("/update").put(authorizeAdmin, sendUnauthorizedStatus, updateUser);
+router.route("/delete").delete(authorizeAdmin, sendUnauthorizedStatus, deleteUser);
+router.route("/all").get(authorizeAdmin, sendUnauthorizedStatus, getAllUsers);
+router.route("/me").get(authorizeBasic, 
   // unauthorized users 401
   (req, res) => {
     if (req.body.authorized) {
@@ -59,7 +67,7 @@ router.route("/logout").get((req, res) => {
   if(target){
     res.redirect(target);
   }else{
-  res.redirect("/aovi/login");
+  res.redirect("/aovi/views/login");
   }
 });
 
