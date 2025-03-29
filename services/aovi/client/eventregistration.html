@@ -14,15 +14,31 @@
 
       
         #userGroupInput {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            flex-grow: 1;
             height: 60%;
             width: 100%;
+            overflow-y: scroll;
+            position: relative;
+            text-align: center;
+            display:block;
+            padding-bottom: 150px;
+        }
+
+        label {
+            margin:15px;
+            display:block;
         }
 
  
+        .bigButton#joinButton {
+           bottom: auto;
+           width:80%;
+           margin: 0 auto; 
+           display: block;
+           left:10%;
+           margin-bottom: 50px;
+
+        }
 
 
     </style>
@@ -32,8 +48,10 @@
     <div id="app">
         
         <h1 data-translator-text="About you"></h1>
-        <div id="userGroupInput"></div>
-        <button class="bigButton" id="joinButton" data-translator-text="JOIN"></button>
+        <div id="userGroupInput">
+            
+        </div>
+       
     </div>
     <!-- <svg width="960" height="600"></svg> -->
     <script>
@@ -91,7 +109,7 @@
         const inputsDiv = document.getElementById('userGroupInput');
         // check if user has already selected categories in local storage
         const storedCategories = JSON.parse(localStorage.getItem('userCategories'));
-       
+       // revert userCategories array
         userCategories.forEach(category => {
             const label = document.createElement('label');
             label.textContent = category.name;
@@ -112,14 +130,13 @@
         });
 
         
-        })
-        .catch((error) => {
-            console.error('Error fetching event data:', error);
-        });
+        const joinButton = document.createElement('button');
+        joinButton.className = 'bigButton';
+        joinButton.id = 'joinButton';
+        joinButton.setAttribute('data-translator-text', 'JOIN');
+        joinButton.textContent = t('JOIN');
 
-
-        // event button take me to /aovi/event/id/67d3fed2db6831ccfa76619c
-        document.querySelector('#joinButton').addEventListener('click', () => {
+        joinButton.addEventListener('click', () => {
             // get all select values
             const selects = document.querySelectorAll('select');
             const values = Array.from(selects).map(select => select.value);
@@ -133,6 +150,15 @@
             localStorage.setItem('userCategories', JSON.stringify(userCategories));
             location.assign(`/aovi/views/events/${eventId}`);
         });
+
+        inputsDiv.appendChild(joinButton);
+        })
+        .catch((error) => {
+            console.error('Error fetching event data:', error);
+        });
+
+
+
     
 
 

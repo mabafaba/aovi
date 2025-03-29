@@ -110,8 +110,6 @@ class MainNavigation extends HTMLElement {
             <style>
                 nav {
                     position: relative;
-                    padding: 15px;
-                    padding-top: 20px;
                     top: 0;
                     left: 0;
                     display: flex;
@@ -120,6 +118,8 @@ class MainNavigation extends HTMLElement {
                     z-index: 2;
                     box-sizing: border-box;
                     height: 100%;
+                    padding-left: 15px;
+                    padding-right: 15px;
                     
                 }
 
