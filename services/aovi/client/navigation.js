@@ -133,7 +133,7 @@ class MainNavigation extends HTMLElement {
                 }
 
                 img {
-                    height: 40px;
+                    height: 100%;
                 }
 
                 #menubutton {

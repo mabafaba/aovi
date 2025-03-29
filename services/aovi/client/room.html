@@ -77,17 +77,25 @@
             position: relative;
             font-size: 17px;
             font-weight: bold;
-            text-align: center;
             border-radius:10px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             margin-top:15px;
             margin-bottom:10px;
-            /* thin text */
-            /* font-weight:200; */
-
         }
+
+        #questionText {
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        #previousRoomButton, #nextRoomButton {
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+
 
         display-comments-as-chat {
             position: relative;
@@ -102,6 +110,23 @@
 
 
 
+        .arrowRight {
+            border: solid rgba(0, 0, 0, 0.476);
+            border-width: 0 3px 3px 0;
+            display: inline-block;
+            padding: 10px;
+            transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg);
+        }
+
+        .arrowLeft {
+            border: solid rgba(0, 0, 0, 0.476);
+            border-width: 0 3px 3px 0;
+            display: inline-block;
+            padding: 10px;
+            transform: rotate(135deg);
+            -webkit-transform: rotate(135deg);
+        }
     
         
 
@@ -160,6 +185,19 @@
         console.error('Error fetching room data:', error);
 });
 
+
+eventData = await fetch(`/aovi/rooms/id/${eventID}`, {
+    method: 'GET',
+    headers: {
+    'Content-Type': 'application/json'
+    }
+})
+    .then(response => response.json())
+    .catch((error) => {
+        console.error('Error fetching event data:', error);
+    });
+    console.log('Event data:', eventData);
+
     console.log('Room data:', roomData);
 
 
@@ -173,13 +211,18 @@ loadData().then(() => {
      room="${roomID}"
      back-url="/aovi/views/events/${eventID}"
      ></main-navigation>`;
-     const appHtml =  `<div id="question"></div>
+     const appHtml =  `<div id="question">
+            <div id="previousRoomButton" class="arrowLeft" onclick="previousRoom()"></div>
+            <div id="questionText">
+            </div>
+            <div id="nextRoomButton" class="arrowRight" onclick="nextRoom()"></div>
+        </div>
     <display-comments-as-chat room="${roomID}"></display-comments-as-chat>
     <comment-input room="${roomID}"></comment-input>
     `;
     document.body.innerHTML = navigationHtml + document.body.innerHTML;
     document.getElementById('app').innerHTML = appHtml;
-    document.getElementById('question').innerHTML = roomData.title;
+    document.getElementById('questionText').innerHTML = roomData.title;
 
 
 
@@ -190,6 +233,35 @@ loadData().then(() => {
         //     document.querySelector('display-comments-as-chat').setAttribute('room', newRoom);
         //     document.querySelector('main-navigation').setAttribute('room', newRoom);
         // }
+
+
+
+nextRoom = function() {
+    const roomList = eventData
+    // which are we on?
+    const currentRoomIndex = eventData.containsRooms.findIndex(room => room._id === roomID);
+    console.log('current room index:', currentRoomIndex);
+    // get next room
+    const nextRoomIndex = (currentRoomIndex + 1) % eventData.containsRooms.length;
+    const nextRoomURL = "/aovi/views/events/" + eventID + "/room/" + eventData.containsRooms[nextRoomIndex]._id;
+    location.assign(nextRoomURL);
+}
+
+previousRoom = function() {
+    const roomList = eventData
+    // which are we on?
+    const currentRoomIndex = eventData.containsRooms.findIndex(room => room._id === roomID);
+    console.log('current room index:', currentRoomIndex);
+    // get previous room
+    const previousRoomIndex = (currentRoomIndex - 1 + eventData.containsRooms.length) % eventData.containsRooms.length;
+    const previousRoomURL = "/aovi/views/events/" + eventID + "/room/" + eventData.containsRooms[previousRoomIndex]._id;
+    console.log('previous room index:', previousRoomIndex);
+    console.log('previous room url:', previousRoomURL);
+    // change room
+    location.assign(previousRoomURL);
+    
+
+}
 
 
 
