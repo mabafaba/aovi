@@ -144,6 +144,22 @@ router.get('/', async (req, res) => {
 });
 
 
+router.get('/raw', async (req, res) => {
+    // check if user role includes superadmin
+    if (!req.body.user || !req.body.user.role || !req.body.user.role.includes('superadmin')) {
+        return res.status(403).send({ message: 'Forbidden' });
+    }
+    console.log('get all comments raw');
+    try {
+        const comments = await Comment.find();
+        res.status(200).send(comments);
+    } catch (error) {
+        res.status(500).send(error);
+        }
+    });
+
+
+
 // Read comments by room name
 router.get('/room/:id', async (req, res) => {
     console.log('get comments by room', req.params.id);
