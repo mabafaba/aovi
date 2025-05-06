@@ -1,109 +1,107 @@
 class MainNavigation extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+
+  connectedCallback() {
+    this.render();
+
+    this.shadowRoot
+      .getElementById("menubutton")
+      .addEventListener("click", () => {
+        const menu = this.shadowRoot.getElementById("menu");
+        this.shadowRoot.getElementById("menu").classList.toggle("hidden");
+      });
+
+    // if back-url attribute is set, show back button & add event listener
+
+    // fetching back0-url
+    console.log("back url:", this.getAttribute("back-url"));
+    if (this.getAttribute("back-url")) {
+      console.log("back url set to", this.getAttribute("back-url"));
+      this.shadowRoot.getElementById("backbutton").classList.remove("hidden");
+      this.shadowRoot
+        .getElementById("backbutton")
+        .addEventListener("click", () => {
+          window.location.href = this.getAttribute("back-url");
+        });
     }
 
-    connectedCallback() {
-        this.render();
+    // if menu-item-1-label & menu-item-1-url attributes are set, add menu item (for however many are set)
+    const setMenuItems = () => {
+      console.log("setting menu items");
+      // get menu labels from attributes (stored as json array string)
+      let menuLabels = this.getAttribute("menu-item-labels");
+      console.log(menuLabels);
+      if (menuLabels) {
+        menuLabels = JSON.parse(menuLabels);
+      }
+      console.log("menu labels", menuLabels);
+      const menuUrls = JSON.parse(this.getAttribute("menu-item-urls"));
+      const menu = this.shadowRoot.getElementById("menu");
+      const table = menu.querySelector("table");
+      console.log("table", table);
+      // clear existing menu items
+      table.innerHTML = "";
+      // create new menu items unless null
+      // log wether menu labels are null
 
-
-        this.shadowRoot.getElementById('menubutton').addEventListener('click', () => {
-            const menu =  this.shadowRoot.getElementById('menu');
-            this.shadowRoot.getElementById('menu').classList.toggle('hidden');
+      if (menuLabels === null) {
+        // hide menu button
+        this.shadowRoot.getElementById("menubutton").classList.add("hidden");
+        return;
+      }
+      menuLabels.forEach((label, index) => {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.textContent = label;
+        td.addEventListener("click", () => {
+          window.location.href = menuUrls[index];
         });
-
-        // if back-url attribute is set, show back button & add event listener
-
-        // fetching back0-url
-        console.log('back url:', this.getAttribute('back-url'));
-        if (this.getAttribute('back-url')) {
-            console.log('back url set to', this.getAttribute('back-url'));
-            this.shadowRoot.getElementById('backbutton').classList.remove('hidden');
-            this.shadowRoot.getElementById('backbutton').addEventListener('click', () => {
-                window.location.href = this.getAttribute('back-url');
-            });
-        }
-
-        // if menu-item-1-label & menu-item-1-url attributes are set, add menu item (for however many are set)
-        const setMenuItems = () => {
-            console.log("setting menu items");
-            // get menu labels from attributes (stored as json array string)
-            let menuLabels = this.getAttribute('menu-item-labels')
-            console.log(menuLabels);    
-            if(menuLabels) {
-                menuLabels = JSON.parse(menuLabels);
-    
-            }
-            console.log('menu labels', menuLabels);
-            const menuUrls = JSON.parse(this.getAttribute('menu-item-urls'));
-            const menu = this.shadowRoot.getElementById('menu');
-            const table = menu.querySelector('table');
-            console.log('table', table);
-            // clear existing menu items
-            table.innerHTML = '';
-            // create new menu items unless null
-            // log wether menu labels are null
-
-            if(menuLabels === null){
-                // hide menu button
-                this.shadowRoot.getElementById('menubutton').classList.add('hidden');
-                return;
-            }
-            menuLabels.forEach((label, index) => {
-                const tr = document.createElement('tr');
-                const td = document.createElement('td');
-                td.textContent = label;
-                td.addEventListener('click', () => {
-                    window.location.href = menuUrls[index];
-                });
-                tr.appendChild(td);
-                table.appendChild(tr);
-            });
-            
-        }
+        tr.appendChild(td);
+        table.appendChild(tr);
+      });
+    };
 
     setMenuItems();
+  }
 
-       
+  static get observedAttributes() {
+    return ["back-url", "menu-item-labels", "menu-item-urls"];
+  }
 
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "back-url" && this.shadowRoot) {
+      const backButton = this.shadowRoot.getElementById("backbutton");
+      if (newValue) {
+        console.log("back url set to", newValue);
+        backButton.classList.remove("hidden");
+        backButton.addEventListener("click", () => {
+          window.location.href = newValue;
+        });
+      } else {
+        backButton.classList.add("hidden");
+        backButton.removeEventListener("click", () => {
+          window.location.href = oldValue;
+        });
+      }
     }
-
-    static get observedAttributes() {
-        return ['back-url', 'menu-item-labels', 'menu-item-urls'];
+    if (oldValue !== newValue) {
+      this.render();
+      this.connectedCallback();
     }
+  }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'back-url' && this.shadowRoot) {
-            const backButton = this.shadowRoot.getElementById('backbutton');
-            if (newValue) {
-                console.log('back url set to', newValue);
-                backButton.classList.remove('hidden');
-                backButton.addEventListener('click', () => {
-                    window.location.href = newValue;
-                });
-            } else {
-                backButton.classList.add('hidden');
-                backButton.removeEventListener('click', () => {
-                    window.location.href = oldValue;
-                });
-            }
-        }
-        if (oldValue !== newValue) {
-            this.render();
-            this.connectedCallback();
-        }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this.render();
+      this.connectedCallback();
     }
+  }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (oldValue !== newValue) {
-            this.render();
-            this.connectedCallback();
-        }
-    }
-
-    render() {
-        this.shadowRoot.innerHTML = `
+  render() {
+    this.shadowRoot.innerHTML = `
             <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
             <script src="/aovi/static/languagepicker.js"></script>
@@ -133,7 +131,7 @@ class MainNavigation extends HTMLElement {
                 }
 
                 img {
-                    height: 100%;
+                    max-height: 80%;
                 }
 
                 #menubutton {
@@ -144,11 +142,23 @@ class MainNavigation extends HTMLElement {
                 }
 
                 #logo {
-                    position: relative;
+                    position: absolute;
                     top: 0;
                     left: 50%;
                     transform: translateX(-50%);
                     margin-bottom: 0;
+                }
+
+                #unitaclogo {
+                    position: relative;
+                    top: 0;
+                    left: 0px;
+                    max-height: 60%;
+                    box-sixing: border-box;
+                    margin-top: auto;
+                    margin-bottom: auto;
+                    cursor: pointer;
+
                 }
 
                 .hidden {
@@ -228,17 +238,15 @@ class MainNavigation extends HTMLElement {
                 <table>
                 </table>
             </div>
-
+           
+            <img src="/aovi/static/unitaclogo.png" id="unitaclogo" onclick="window.open('https://unitac.un.org/', '_blank')">
             <img src="/aovi/static/logo.png" id="logo">
 
             <language-picker languages="pt,en,fr,de"></language-picker>
                 
             </nav>
         `;
-
-
-    }
+  }
 }
 
-customElements.define('main-navigation', MainNavigation);
-
+customElements.define("main-navigation", MainNavigation);

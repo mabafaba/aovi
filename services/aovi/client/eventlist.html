@@ -1,413 +1,633 @@
 <!DOCTYPE html>
 <html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Timeline</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="/aovi/comments/static/commentInput.js"></script>
     <script src="/aovi/comments/static/displayCommentsAsChat.js"></script>
     <!-- fontawesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script src="/aovi/static/navigation.js"></script>
     <script src="/aovi/static/commenttimeline.js"></script>
     <script src="/aovi/static/languagepicker.js"></script>
+    <!-- Add xlsx library for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <!-- classless sakura -->
-    <link rel="stylesheet" href="/aovi/static/style.css">
+    <link rel="stylesheet" href="/aovi/static/style.css" />
 
     <style>
-
-        
-
-        #app {
-            /* position: relative;
+      #app {
+        /* position: relative;
             display: flex;
             flex-direction: column;
             height: 100vh;
             width: 80%;*/
-            margin:auto; 
-            overflow-y: scroll;
+        margin: auto;
+        overflow-y: scroll;
+      }
 
-        }
+      #app div {
+        width: 90%;
+        margin: auto;
+        padding: 15px;
 
-        
-        #app div {
-            width: 90%;
-            margin: auto;
-            padding: 15px;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        margin-top: 20px;
+      }
 
-            border-radius: 10px;
-            background-color: #f9f9f9;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-            margin-top: 20px;
-        }
-    
-        comments-timeline {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            width: 100%;
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            border-radius:10px;
-        }
+      comments-timeline {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        border-radius: 10px;
+      }
 
-        /* make a look like buttons */
-        a {
-           
-            cursor: pointer;
-        }
-        
-        .event {
-         
-            padding: 10px;
-            margin: 10px;
-            border-radius: 10px;
-            border: 1px dotted black;
-            width:80%;
+      /* make a look like buttons */
+      a {
+        cursor: pointer;
+      }
 
-        }
+      .event {
+        padding: 10px;
+        margin: 10px;
+        border-radius: 10px;
+        border: 1px dotted black;
+        width: 80%;
+      }
 
-        .event * {}
+      .event * {
+      }
 
+      .eventName {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 20px;
+        font-weight: bold;
+        padding: 10px;
+        margin: 10px;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+      }
 
-        .eventName {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 20px;
-            font-weight: bold;
-            padding: 10px;
-            margin: 10px;
-            border-radius: 10px;
-            background-color: #f9f9f9;
-        }
-        
-        tr {
-            margin: 20px;
-            padding: 50px;
-        }
+      tr {
+        margin: 20px;
+        padding: 50px;
+      }
 
-        img {
-            float:left;
-            width:50%;
-            margin-right:20px;
-            cursor:pointer;
-        }
+      img {
+        float: left;
+        width: 50%;
+        margin-right: 20px;
+        cursor: pointer;
+      }
 
-        table  {
-            width:50%;
-            float:right;
-        }
+      table {
+        width: 50%;
+        float: right;
+      }
 
-        main-navigation {
-            margin-bottom: 20px;
-        }
+      main-navigation {
+        margin-bottom: 20px;
+      }
 
-        .link {
-            background-color: none;;
-            /* color: rgb(0, 0, 2);
+      .link {
+        background-color: none;
+        /* color: rgb(0, 0, 2);
             text-decoration: none;
             cursor: pointer;
             padding: 10px;
             margin: 10px;
             border-radius: 10px; */
-        }
+      }
 
-        .eventDetails {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            /* animate height */
-            transition: height 2s;
-        }
+      .eventDetails {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        /* animate height */
+        transition: height 2s;
+      }
 
-        .eventDetails.collapsed {
-            position: relative;
-            height: 0 !important;
-            overflow: hidden;
-            padding: 0 !important;
-            margin:0 !important;
-            transition: height 2s;
-        }
+      .eventDetails.collapsed {
+        position: relative;
+        height: 0 !important;
+        overflow: hidden;
+        padding: 0 !important;
+        margin: 0 !important;
+        transition: height 2s;
+      }
 
-        .collapsible {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            user-select: none;
-        }
+      .collapsible {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        user-select: none;
+      }
 
-        .arrow {
-            display: inline;
-            margin-right: 8px;
-            transition: transform 0.5s ease;
-            content: '▶';
-        }
+      .arrow {
+        display: inline;
+        margin-right: 8px;
+        transition: transform 0.5s ease;
+        content: "▶";
+      }
 
-        .arrow.collapsed {
-            transform: rotate(90deg);
-        }
+      .arrow.collapsed {
+        transform: rotate(90deg);
+      }
 
+      .download-btn {
+        color: #fff;
+        background-color: #28a745;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+        display: inline-flex;
+        align-items: center;
+        font-size: 14px;
+      }
+
+      .download-btn i {
+        margin-right: 5px;
+      }
+
+      .download-btn:hover {
+        background-color: #218838;
+      }
+
+      .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s linear infinite;
+        margin-right: 8px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <main-navigation
-        menu-item-labels='["All Events","New Event", "Logout"]'
-        menu-item-urls='["/aovi/views/events","/aovi/views/events/create","/aovi/user/logout"]'
+      menu-item-labels='["All Events","New Event", "Logout"]'
+      menu-item-urls='["/aovi/views/events","/aovi/views/events/create","/aovi/user/logout"]'
     ></main-navigation>
-    <div id="app">
-        
-    
-    </div>
+    <div id="app"></div>
     <!-- <svg width="960" height="600"></svg> -->
     <script>
+      const t = translator({
+        en: {
+          register: "Register",
+          overview: "Go to Overview",
+          timeline: "Go to Timeline",
+          network: "Go to Network",
+          Delete: "Delete",
+          "You are not authorized to delete this event":
+            "You are not authorized to delete this event",
+          "Are you sure you want to delete this event?":
+            "Are you sure you want to delete this event?",
+          download_comments: "Download Comments (Excel)",
+          downloading: "Downloading...",
+          no_comments: "No comments found for this event",
+        },
+        pt: {
+          register: "Registrar",
+          overview: "Ir para Visão Geral",
+          timeline: "Ir para Linha do Tempo",
+          network: "Ir para Rede",
+          Delete: "Deletar",
+          "You are not authorized to delete this event":
+            "Você não está autorizado a excluir este evento",
+          "Are you sure you want to delete this event?":
+            "Você tem certeza de que deseja excluir este evento?",
+          download_comments: "Baixar Comentários (Excel)",
+          downloading: "Baixando...",
+          no_comments: "Nenhum comentário encontrado para este evento",
+        },
+        es: {
+          register: "Registrarse",
+          overview: "Ir a la Visión General",
+          timeline: "Ir a la Línea de Tiempo",
+          network: "Ir a la Red",
+          Delete: "Eliminar",
+          "You are not authorized to delete this event":
+            "No estás autorizado a eliminar este evento",
+          "Are you sure you want to delete this event?":
+            "¿Estás seguro de que deseas eliminar este evento?",
+          download_comments: "Descargar Comentarios (Excel)",
+          downloading: "Descargando...",
+          no_comments: "No hay comentarios para este evento",
+        },
+        fr: {
+          register: "S'inscrire",
+          overview: "Aller à l'Aperçu",
+          timeline: "Aller à la Chronologie",
+          network: "Aller au Réseau",
+          Delete: "Supprimer",
+          "You are not authorized to delete this event":
+            "Vous n'êtes pas autorisé à supprimer cet événement",
+          "Are you sure you want to delete this event?":
+            "Êtes-vous sûr de vouloir supprimer cet événement?",
+          download_comments: "Télécharger les Commentaires (Excel)",
+          downloading: "Téléchargement...",
+          no_comments: "Aucun commentaire trouvé pour cet événement",
+        },
+        de: {
+          register: "Registrieren",
+          overview: "Zur Übersicht",
+          timeline: "Zum Zeitstrahl",
+          network: "Zum Netzwerk",
+          Delete: "Löschen",
+          "You are not authorized to delete this event":
+            "Sie sind nicht berechtigt, dieses Ereignis zu löschen",
+          "Are you sure you want to delete this event?":
+            "Sind Sie sicher, dass Sie dieses Ereignis löschen möchten?",
+          download_comments: "Kommentare herunterladen (Excel)",
+          downloading: "Wird heruntergeladen...",
+          no_comments: "Keine Kommentare für dieses Ereignis gefunden",
+        },
+      });
 
+      // Function to download comments as Excel file
+      async function downloadCommentsAsExcel(event) {
+        const btn = event.currentTarget;
+        const eventId = btn.getAttribute("data-event-id");
+        const eventName = btn.getAttribute("data-event-name");
 
-const t = translator({
-    'en': {
-        'register': 'Register',
-        'overview': 'Go to Overview',
-        'timeline': 'Go to Timeline',
-        'network': 'Go to Network',
-        'Delete': 'Delete',
-        'You are not authorized to delete this event': 'You are not authorized to delete this event',
-        'Are you sure you want to delete this event?': 'Are you sure you want to delete this event?',
-    },
-    'pt': {
-        'register': 'Registrar',
-        'overview': 'Ir para Visão Geral',
-        'timeline': 'Ir para Linha do Tempo',
-        'network': 'Ir para Rede',
-        'Delete': 'Deletar',
-        'You are not authorized to delete this event': 'Você não está autorizado a excluir este evento',
-        'Are you sure you want to delete this event?': 'Você tem certeza de que deseja excluir este evento?',
-    },
-    'es': {
-        'register': 'Registrarse',
-        'overview': 'Ir a la Visión General',
-        'timeline': 'Ir a la Línea de Tiempo',
-        'network': 'Ir a la Red',
-        'Delete': 'Eliminar',
-        'You are not authorized to delete this event': 'No estás autorizado a eliminar este evento',
-        'Are you sure you want to delete this event?': '¿Estás seguro de que deseas eliminar este evento?',
-    },
-    'fr': {
-        'register': 'S\'inscrire',
-        'overview': 'Aller à l\'Aperçu',
-        'timeline': 'Aller à la Chronologie',
-        'network': 'Aller au Réseau',
-        'Delete': 'Supprimer',
-        'You are not authorized to delete this event': 'Vous n\'êtes pas autorisé à supprimer cet événement',
-        'Are you sure you want to delete this event?': 'Êtes-vous sûr de vouloir supprimer cet événement?',
-    },
-    'de': {
-        'register': 'Registrieren',
-        'overview': 'Zur Übersicht',
-        'timeline': 'Zum Zeitstrahl',
-        'network': 'Zum Netzwerk',
-        'Delete': 'Löschen',
-        'You are not authorized to delete this event': 'Sie sind nicht berechtigt, dieses Ereignis zu löschen',
-        'Are you sure you want to delete this event?': 'Sind Sie sicher, dass Sie dieses Ereignis löschen möchten?',
-    }
-});
+        // Show loading state
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = `<div class="loading-spinner"></div>${t(
+          "downloading"
+        )}`;
+        btn.disabled = true;
 
-async function getEvents (){
-        const me = await fetch('/aovi/user/me', {
-            method: 'GET',
-            headers: {
-            'Content-Type': 'application/json'
+        try {
+          // Get rooms for this event
+          const roomIds = btn.getAttribute("data-room-ids").split(",");
+
+          if (!roomIds || roomIds.length === 0) {
+            alert("No rooms found for this event");
+            return;
+          }
+
+          const rooms = await Promise.all(
+            roomIds.map(async (roomid) => {
+              return fetch(`/aovi/rooms/id/${roomid}`).then((res) =>
+                res.json()
+              );
+            })
+          );
+          const roomData = {};
+          rooms.map((room) => {
+            roomData[room._id] = {
+              name: room.name,
+              title: room.title,
+            };
+          });
+
+          console.log("rooms:", roomData);
+
+          // Fetch comments for all rooms in the event
+          const response = await fetch(
+            `/aovi/comments/event/${roomIds.join(",")}`
+          );
+          const comments = await response.json();
+
+          comments.map((comment) => {
+            // add room name and title to comment
+            const room = roomData[comment.room];
+            if (room) {
+              comment.roomName = room.name;
+              comment.roomTitle = room.title;
             }
-        })
-        .then(response => response.json())
-        .catch((error) => {
-            console.error('Error fetching user data:', error);
-        });
+          });
+          if (!comments || comments.length === 0) {
+            alert(t("no_comments"));
+            // Reset button state
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+            return;
+          }
 
+          // Format data for Excel
+          const worksheetData = comments.map((comment) => {
+            // Format date
+            const date = new Date(comment.createdAt);
+            const formattedDate = date.toISOString().split("T")[0];
+            const formattedTime = date.toTimeString().split(" ")[0];
+
+            // Extract user categories from comment.data similar to analyse_all_comments.js
+            const data = comment.data ? comment.data : {};
+            const userCategories = data.userCategories
+              ? data.userCategories
+              : {};
+            console.log("comment to save", comment);
+            comment.data = JSON.parse(data);
+            console.log("data to save", comment.data);
+            // Create base comment object with standard fields
+            const commentObj = {
+              Date: formattedDate,
+              Time: formattedTime,
+              Room: comment.room,
+              "Room Name": comment.roomName,
+              "Room Title": comment.roomTitle,
+              Comment: comment.text,
+              Agrees: comment.agrees || 0,
+              Disagrees: comment.disagrees || 0,
+              Neutrals: comment.neutrals || 0,
+              ...comment.data.userCategories,
+            };
+
+            // Add user categories as separate columns, similar to analyse_all_comments.js
+            Object.keys(userCategories).forEach((key) => {
+              console.log("userCategories key:", key);
+              commentObj[key] = userCategories[key];
+            });
+
+            return commentObj;
+          });
+
+          // Create workbook and add worksheet
+          const wb = XLSX.utils.book_new();
+          const ws = XLSX.utils.json_to_sheet(worksheetData);
+
+          // Get all unique column headers for proper width setting
+          const allKeys = new Set();
+          worksheetData.forEach((item) => {
+            Object.keys(item).forEach((key) => allKeys.add(key));
+          });
+
+          // Set column widths
+          const colWidths = Array.from(allKeys).map((key) => {
+            // Set appropriate width based on column type
+            if (key === "Comment") return { wch: 60 };
+            if (key === "Date") return { wch: 12 };
+            if (key === "Time") return { wch: 10 };
+            if (key === "Room") return { wch: 20 };
+            if (["Agrees", "Disagrees", "Neutrals"].includes(key))
+              return { wch: 8 };
+            // Default width for user category columns
+            return { wch: 15 };
+          });
+
+          ws["!cols"] = colWidths;
+
+          // Add the worksheet to the workbook
+          XLSX.utils.book_append_sheet(wb, ws, "Comments");
+
+          // Generate filename with date and event name
+          const today = new Date().toISOString().split("T")[0];
+          const sanitizedEventName = eventName
+            .replace(/[^\w\s]/gi, "")
+            .replace(/\s+/g, "_");
+          const filename = `${today}_${sanitizedEventName}_comments.xlsx`;
+
+          // Write to file and trigger download
+          XLSX.writeFile(wb, filename);
+        } catch (error) {
+          console.error("Error downloading comments:", error);
+          alert("Error downloading comments: " + error.message);
+        } finally {
+          // Reset button state
+          btn.innerHTML = originalContent;
+          btn.disabled = false;
+        }
+      }
+
+      async function getEvents() {
+        const me = await fetch("/aovi/user/me", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .catch((error) => {
+            console.error("Error fetching user data:", error);
+          });
 
         const rooms = await fetch(`/aovi/rooms`, {
-            method: 'GET',
-            headers: {
-            'Content-Type': 'application/json'
-            }
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         })
-        .then(response => response.json())
-        .catch((error) => {
-            console.error('Error fetching event data:', error);
-        });
-
+          .then((response) => response.json())
+          .catch((error) => {
+            console.error("Error fetching event data:", error);
+          });
 
         // events are all rooms where containsRooms is array and length >0
-        const events = rooms.filter(room => room.containsRooms && room.containsRooms.length > 0);
+        const events = rooms.filter(
+          (room) => room.containsRooms && room.containsRooms.length > 0
+        );
 
         // attach rooms to events
-        events.forEach(event => {
-            event.rooms = event.containsRooms.map(roomId => rooms.find(room => room._id === roomId));
+        events.forEach((event) => {
+          event.rooms = event.containsRooms.map((roomId) =>
+            rooms.find((room) => room._id === roomId)
+          );
         });
 
-        return {events, me};
+        return { events, me };
+      }
 
-    }
-    
-
-
-
-    getEvents().then(({events, me}) => {
-
+      getEvents().then(({ events, me }) => {
         // make a div for each event.
         // attach links for each contained room.
         // attach link for overview and timeline panels
 
         console.log("events:", events);
         console.log("me:", me);
-        const app = document.getElementById('app');
-        events.forEach(event => {
-            const eventDiv = document.createElement('div');
-            eventDiv.className = 'event';
-            eventDiv.setAttribute('data-id', event._id);
-            app.prepend(eventDiv);
-            // append name as h2a
-            const eventName = document.createElement('h2');
-            // add class
-            eventName.className = 'eventName';
-            eventName.textContent = event.name;
-            eventDiv.appendChild(eventName);
+        const app = document.getElementById("app");
+        events.forEach((event) => {
+          const eventDiv = document.createElement("div");
+          eventDiv.className = "event";
+          eventDiv.setAttribute("data-id", event._id);
+          app.prepend(eventDiv);
+          // append name as h2a
+          const eventName = document.createElement("h2");
+          // add class
+          eventName.className = "eventName";
+          eventName.textContent = event.name;
+          eventDiv.appendChild(eventName);
 
-            // arrow div
-            // const arrow = document.createElement('div');
-            // arrow.className = 'arrow';
-            // arrow.textContent = '▶';
-            // eventName.prepend(arrow);
+          // arrow div
+          // const arrow = document.createElement('div');
+          // arrow.className = 'arrow';
+          // arrow.textContent = '▶';
+          // eventName.prepend(arrow);
 
-            const eventDetailsDiv = document.createElement('div');
-            eventDetailsDiv.className = 'eventDetails';
-            eventDetailsDiv.classList.add('collapsed');
+          const eventDetailsDiv = document.createElement("div");
+          eventDetailsDiv.className = "eventDetails";
+          eventDetailsDiv.classList.add("collapsed");
 
+          // on click, toggle the class
+          eventName.addEventListener("click", () => {
+            eventDetailsDiv.classList.toggle("collapsed");
+          });
 
+          const qrImage = document.createElement("img");
+          qrImage.src = `/aovi/events/${event._id}/qr`;
+          // on click, open qr link  in new tab
+          qrImage.addEventListener("click", () => {
+            // don't bubble
 
-            // on click, toggle the class
-            eventName.addEventListener('click', () => {
-                eventDetailsDiv.classList.toggle('collapsed');
+            window.open(`/aovi/events/${event._id}/qr`, "_blank");
+          });
+          // 100% width
+          // qrImage.style.width = '100px';
+
+          eventDetailsDiv.appendChild(qrImage);
+
+          const table = document.createElement("table");
+
+          eventDetailsDiv.appendChild(table);
+
+          const registrationRow = document.createElement("tr");
+          const registrationCell = document.createElement("td");
+          const registrationLink = document.createElement("a");
+          registrationLink.setAttribute("data-translator-text", "register");
+          registrationLink.className = "link";
+          registrationLink.href = `/aovi/views/events/${event._id}/registration`;
+          registrationLink.textContent = t("register");
+          registrationCell.appendChild(registrationLink);
+          registrationRow.appendChild(registrationCell);
+          table.appendChild(registrationRow);
+
+          const overviewRow = document.createElement("tr");
+          const overviewCell = document.createElement("td");
+          const overviewLink = document.createElement("a");
+          overviewLink.setAttribute("data-translator-text", "overview");
+          overviewLink.className = "link";
+          overviewLink.href = `/aovi/views/events/${event._id}/overview`;
+          overviewLink.textContent = t("overview");
+          overviewCell.appendChild(overviewLink);
+          overviewRow.appendChild(overviewCell);
+          table.appendChild(overviewRow);
+          const timelineRow = document.createElement("tr");
+          const timelineCell = document.createElement("td");
+          const timelineLink = document.createElement("a");
+          timelineLink.setAttribute("data-translator-text", "timeline");
+          timelineLink.className = "link";
+          timelineLink.href = `/aovi/views/events/${event._id}/timeline`;
+          timelineLink.textContent = t("timeline");
+          timelineCell.appendChild(timelineLink);
+          timelineRow.appendChild(timelineCell);
+          table.appendChild(timelineRow);
+
+          const networkRow = document.createElement("tr");
+          const networkCell = document.createElement("td");
+          const networkLink = document.createElement("a");
+          networkLink.className = "link";
+          networkLink.setAttribute("data-translator-text", "network");
+          networkLink.href = `/aovi/views/events/${event._id}/network`;
+          networkLink.textContent = t("network");
+          networkCell.appendChild(networkLink);
+          networkRow.appendChild(networkCell);
+          table.appendChild(networkRow);
+
+          // Add download comments button
+          const downloadRow = document.createElement("tr");
+          const downloadCell = document.createElement("td");
+          const downloadLink = document.createElement("a");
+          downloadLink.className = "link";
+          downloadLink.setAttribute(
+            "data-translator-text",
+            "download_comments"
+          );
+          downloadLink.setAttribute("data-event-id", event._id);
+          downloadLink.setAttribute("data-event-name", event.name);
+          downloadLink.setAttribute(
+            "data-room-ids",
+            event.containsRooms.join(",")
+          );
+          downloadLink.textContent = t("download_comments");
+          downloadLink.addEventListener("click", downloadCommentsAsExcel);
+          downloadCell.appendChild(downloadLink);
+          downloadRow.appendChild(downloadCell);
+          table.appendChild(downloadRow);
+
+          // delete button if user is superadmin or if userIsCreator
+          if (me.role.includes("superadmin") || event.userIsCreator) {
+            const deleteRow = document.createElement("tr");
+            const deleteCell = document.createElement("td");
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "link";
+            deleteButton.setAttribute("data-translator-text", "Delete");
+            deleteButton.textContent = t("Delete");
+            deleteButton.addEventListener("click", () => {
+              confirmEventDeletion(event._id);
             });
+            deleteCell.appendChild(deleteButton);
+            deleteRow.appendChild(deleteCell);
+            table.appendChild(deleteRow);
+          }
 
-
-            const qrImage = document.createElement('img');
-            qrImage.src = `/aovi/events/${event._id}/qr`;
-            // on click, open qr link  in new tab
-            qrImage.addEventListener('click', () => {
-                // don't bubble
-                
-                window.open(`/aovi/events/${event._id}/qr`, '_blank');
-            });
-            // 100% width
-            // qrImage.style.width = '100px';
-
-            eventDetailsDiv.appendChild(qrImage);
-
-            const table = document.createElement('table');
-      
-            eventDetailsDiv.appendChild(table);
-
-            const registrationRow = document.createElement('tr');
-            const registrationCell = document.createElement('td');
-            const registrationLink = document.createElement('a');
-            registrationLink.setAttribute('data-translator-text', 'register');
-            registrationLink.className = 'link';
-            registrationLink.href = `/aovi/views/events/${event._id}/registration`;
-            registrationLink.textContent = t('register');
-            registrationCell.appendChild(registrationLink);
-            registrationRow.appendChild(registrationCell);
-            table.appendChild(registrationRow);
-
-            const overviewRow = document.createElement('tr');
-            const overviewCell = document.createElement('td');
-            const overviewLink = document.createElement('a');
-            overviewLink.setAttribute('data-translator-text', 'overview');
-            overviewLink.className = 'link';
-            overviewLink.href = `/aovi/views/events/${event._id}/overview`;
-            overviewLink.textContent = t('overview');
-            overviewCell.appendChild(overviewLink);
-            overviewRow.appendChild(overviewCell);
-            table.appendChild(overviewRow);
-            const timelineRow = document.createElement('tr');
-            const timelineCell = document.createElement('td');
-            const timelineLink = document.createElement('a');
-            timelineLink.setAttribute('data-translator-text', 'timeline');
-            timelineLink.className = 'link';
-            timelineLink.href = `/aovi/views/events/${event._id}/timeline`;
-            timelineLink.textContent = t('timeline');
-            timelineCell.appendChild(timelineLink);
-            timelineRow.appendChild(timelineCell);
-            table.appendChild(timelineRow);
-
-            const networkRow = document.createElement('tr');
-            const networkCell = document.createElement('td');
-            const networkLink = document.createElement('a');
-            networkLink.className = 'link';
-            networkLink.setAttribute('data-translator-text', 'network');
-            networkLink.href = `/aovi/views/events/${event._id}/network`;
-            networkLink.textContent = t('network');
-            networkCell.appendChild(networkLink);
-            networkRow.appendChild(networkCell);
-            table.appendChild(networkRow);
-
-            // delete button if user is superadmin or if userIsCreator
-            if(me.role.includes('superadmin') || event.userIsCreator){
-                const deleteRow = document.createElement('tr');
-                const deleteCell = document.createElement('td');
-                const deleteButton = document.createElement('button');
-                deleteButton.className = 'link';
-                deleteButton.setAttribute('data-translator-text', 'Delete');
-                deleteButton.textContent = t('Delete');
-                deleteButton.addEventListener('click', ()=>{confirmEventDeletion(event._id)});
-                deleteCell.appendChild(deleteButton);
-                deleteRow.appendChild(deleteCell);
-                table.appendChild(deleteRow);
-            }
-
-            eventDiv.appendChild(eventDetailsDiv);
-
+          eventDiv.appendChild(eventDetailsDiv);
         });
-    });
-  
-    const confirmEventDeletion = function (id) {
-        const confirmation = confirm(t('Are you sure you want to delete this event?'));
+      });
+
+      const confirmEventDeletion = function (id) {
+        const confirmation = confirm(
+          t("Are you sure you want to delete this event?")
+        );
         if (confirmation) {
-            deleteEvent(id);
+          deleteEvent(id);
         }
-    }
+      };
 
-    const deleteEvent = function (id) {
+      const deleteEvent = function (id) {
         fetch(`/aovi/rooms/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
         })
-        .then(response => {
+          .then((response) => {
             if (response.ok) {
-                console.log('Event deleted successfully');
-                // remove the event from the DOM
-                const eventDiv = document.querySelector(`.event[data-id="${id}"]`);
-                if (eventDiv) {
-                    eventDiv.remove();
-                }
+              console.log("Event deleted successfully");
+              // remove the event from the DOM
+              const eventDiv = document.querySelector(
+                `.event[data-id="${id}"]`
+              );
+              if (eventDiv) {
+                eventDiv.remove();
+              }
             } else {
-                alert(t('You are not authorized to delete this event'));
+              alert(t("You are not authorized to delete this event"));
             }
-        })
-        .catch((error) => {
-            console.error('Error deleting event:', error);
-        });
-    }
+          })
+          .catch((error) => {
+            console.error("Error deleting event:", error);
+          });
+      };
     </script>
-</body>
+  </body>
 </html>

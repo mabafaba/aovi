@@ -159,6 +159,42 @@ router.get('/raw', async (req, res) => {
     });
 
 
+// Read comments by multiple rooms (for an event)
+router.get('/event/:rooms', async (req, res) => {
+    console.log('get comments by event rooms', req.params.rooms);
+    try {
+        // Split the comma-separated room IDs
+        const roomIds = req.params.rooms.split(',');
+        
+        // Find comments for all the specified rooms
+        const comments = await Comment.find({ room: { $in: roomIds } });
+        
+        if (!comments.length) {
+            res.status(200).send([]);
+            return;
+        }
+        
+        // Format for Excel export - include all relevant fields
+        const exportComments = comments.map(comment => {
+            const c = comment.toObject();
+            return {
+                text: c.text,
+                createdAt: c.createdAt,
+                room: c.room,
+                author: c.author,
+                agrees: c.usersAgree ? c.usersAgree.length : 0,
+                disagrees: c.usersDisagree ? c.usersDisagree.length : 0,
+                neutrals: c.usersNeutral ? c.usersNeutral.length : 0,
+                data: c.data ? JSON.stringify(c.data) : ''
+            };
+        });
+        
+        res.status(200).send(exportComments);
+    } catch (error) {
+        console.log('Error fetching event comments:', error);
+        res.status(500).send(error);
+    }
+});
 
 // Read comments by room name
 router.get('/room/:id', async (req, res) => {
