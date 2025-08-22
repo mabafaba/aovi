@@ -14,6 +14,9 @@ class MainNavigation extends HTMLElement {
         this.shadowRoot.getElementById("menu").classList.toggle("hidden");
       });
 
+    // Check for event ID in URL and fetch event logo
+    this.checkAndLoadEventLogo();
+
     // if back-url attribute is set, show back button & add event listener
 
     // fetching back0-url
@@ -67,6 +70,53 @@ class MainNavigation extends HTMLElement {
     setMenuItems();
   }
 
+  // Method to check URL for event ID and load event logo
+  async checkAndLoadEventLogo() {
+    const currentUrl = window.location.pathname;
+    const eventIdMatch = currentUrl.match(
+      /\/aovi\/views\/events\/([a-f\d]{24})/
+    );
+
+    if (eventIdMatch) {
+      const eventId = eventIdMatch[1];
+      try {
+        const response = await fetch(`/aovi/rooms/id/${eventId}`);
+        if (response.ok) {
+          const roomData = await response.json();
+          if (roomData.data && roomData.data.logo) {
+            this.replaceMainLogo(roomData.data.logo);
+          } else {
+            // If no event logo, show the original logo
+            this.showOriginalLogo();
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching event data:", error);
+      }
+    } else {
+      // If no event ID in URL, show the original logo
+      this.showOriginalLogo();
+    }
+  }
+
+  // Method to replace the main logo with event logo
+  replaceMainLogo(logoBase64) {
+    const mainLogo = this.shadowRoot.getElementById("logo");
+    if (mainLogo && logoBase64) {
+      mainLogo.src = logoBase64;
+      mainLogo.classList.remove("hidden");
+    }
+  }
+
+  // Method to show the original logo
+  showOriginalLogo() {
+    const mainLogo = this.shadowRoot.getElementById("logo");
+    if (mainLogo) {
+      mainLogo.src = "/aovi/static/logo.png"; // Assuming the original logo path
+      mainLogo.classList.remove("hidden");
+    }
+  }
+
   static get observedAttributes() {
     return ["back-url", "menu-item-labels", "menu-item-urls"];
   }
@@ -90,6 +140,10 @@ class MainNavigation extends HTMLElement {
     if (oldValue !== newValue) {
       this.render();
       this.connectedCallback();
+      // Also check for event logo when navigation changes
+      if (this.shadowRoot) {
+        this.checkAndLoadEventLogo();
+      }
     }
   }
 
@@ -162,8 +216,7 @@ class MainNavigation extends HTMLElement {
                 }
 
                 .hidden {
-                    height: 0 !important;
-                    overflow: hidden;
+                    visibility: hidden !important;
                 }
 
                 #menu {
@@ -240,7 +293,7 @@ class MainNavigation extends HTMLElement {
             </div>
            
             <img src="/aovi/static/unitaclogo.png" id="unitaclogo" onclick="window.open('https://unitac.un.org/', '_blank')">
-            <img src="/aovi/static/logo.png" id="logo">
+            <img src="/aovi/static/logo.png" id="logo" class="hidden">
 
             <language-picker languages="pt,en,fr,de"></language-picker>
                 
