@@ -331,23 +331,17 @@
             headers: { "Content-Type": "application/json" },
           }).then((response) => response.json());
 
-          // Create child rooms (skip the first one since it's the main room concept)
-          const childRoomPromises = [];
+          // Create child rooms one at a time
           for (let i = 0; i < roomsData.length; i++) {
             const roomData = { ...roomsData[i] };
             roomData.parent = mainroom._id;
 
-            const roomPromise = fetch("/aovi/rooms", {
+            await fetch("/aovi/rooms", {
               method: "POST",
               body: JSON.stringify(roomData),
               headers: { "Content-Type": "application/json" },
-            });
-
-            childRoomPromises.push(roomPromise);
+            }).then((response) => response.json());
           }
-
-          // Wait for all child rooms to be created
-          await Promise.all(childRoomPromises);
 
           // Go to main room registration
           location.assign(`/aovi/views/events/${mainroom._id}/registration`);
