@@ -67,16 +67,29 @@ router.post("/", async (req, res) => {
   console.log("creating room", req.body);
 
   try {
-    const roomData = {
+    // Handle comment categories - sanitize if provided
+    let roomData = req.body.data ? { ...req.body.data } : {};
+
+    // If comment categories are provided, sanitize them
+    if (
+      req.body.commentCategories &&
+      Array.isArray(req.body.commentCategories)
+    ) {
+      roomData.commentCategories = req.body.commentCategories
+        .map((category) => sanitizeHtml(category.toString(), sanitizeOptions))
+        .slice(0, 3); // Ensure only 3 categories maximum
+    }
+
+    const roomDataToCreate = {
       name: req.body.name,
       createdBy: req.body.user.id,
       title: req.body.title,
-      data: req.body.data ? req.body.data : {},
+      data: roomData,
       containsRooms: req.body.containsRooms ? req.body.containsRooms : [],
     };
 
-    console.log("trying roomData", roomData);
-    const room = new Room(roomData);
+    console.log("trying roomData", roomDataToCreate);
+    const room = new Room(roomDataToCreate);
     console.log("as room ob ject", room);
     await room.save();
     console.log("room saved", room);
@@ -193,13 +206,11 @@ router.delete("/:id", async (req, res) => {
     ) {
       await room.delete();
     } else {
-      return res
-        .status(403)
-        .send({
-          message:
-            "You are not authorized to delete this room - ask user" +
-            room.createdBy.toString(),
-        });
+      return res.status(403).send({
+        message:
+          "You are not authorized to delete this room - ask user" +
+          room.createdBy.toString(),
+      });
     }
 
     // delete all contained rooms
@@ -210,13 +221,11 @@ router.delete("/:id", async (req, res) => {
       ) {
         await containedRoom.delete();
       } else {
-        return res
-          .status(403)
-          .send({
-            message:
-              "You are not authorized to delete this room - ask user" +
-              containedRoom.createdBy.toString(),
-          });
+        return res.status(403).send({
+          message:
+            "You are not authorized to delete this room - ask user" +
+            containedRoom.createdBy.toString(),
+        });
       }
     }
 

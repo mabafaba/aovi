@@ -131,6 +131,41 @@
       <label for="tabletags">Participant Categories:</label>
       <div id="tabletagsContainer"></div>
 
+      <!-- Comment Categories Section -->
+      <div style="margin-top: 20px; margin-bottom: 20px">
+        <label>Comment Categories:</label>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+          "
+        >
+          <input
+            type="text"
+            id="commentCategory1"
+            name="commentCategory1"
+            placeholder="Comment Category 1"
+            maxlength="50"
+          />
+          <input
+            type="text"
+            id="commentCategory2"
+            name="commentCategory2"
+            placeholder="Comment Category 2"
+            maxlength="50"
+          />
+          <input
+            type="text"
+            id="commentCategory3"
+            name="commentCategory3"
+            placeholder="Comment Category 3"
+            maxlength="50"
+          />
+        </div>
+      </div>
+
       <div
         style="
           display: flex;
@@ -259,6 +294,13 @@
           "adminBoundariesDropdown"
         ).value;
 
+        // Collect comment categories
+        const commentCategories = [
+          document.getElementById("commentCategory1").value.trim(),
+          document.getElementById("commentCategory2").value.trim(),
+          document.getElementById("commentCategory3").value.trim(),
+        ].filter((category) => category !== ""); // Remove empty categories
+
         // Handle logo upload
         const logoFile = document.getElementById("logo").files[0];
         let logoBase64 = null;
@@ -310,6 +352,7 @@
             name: roomName,
             title: roomTitle,
             data: { userCategories: tabletags, adminBoundary: adminBoundary },
+            commentCategories: commentCategories,
           });
         }
 
@@ -323,6 +366,7 @@
               adminBoundary: adminBoundary,
               ...(logoBase64 && { logo: logoBase64 }),
             },
+            commentCategories: commentCategories,
           };
 
           const mainroom = await fetch("/aovi/rooms", {
